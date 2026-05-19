@@ -4,7 +4,7 @@
 import sys
 import time
 
-SCALE = 1000000000000 # Set whatever you want. 1M, 10M. Test the limits.
+SCALE = 1000000 # Set whatever you want. 1M, 10M. Test the limits.
 TASK = "2560 BC"
 
 AZL_EPOCH_BP = 14350
