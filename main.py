@@ -1,45 +1,34 @@
 #!/usr/bin/env python3
-# AZL Protocol v7.1 - Communication Layer
-"""
-INFINITE LAYER + COMMUNICATION
+# AZL Protocol v7.2 - Unbounded Quiet Mode
 
-ABSOLUTE ZERO = MIYAKE EVENT 14,350 BP
-LAW: 0.0 <= Entropy < 1.0 per agent, per round
-
-COMMUNICATION RULE:
-Agents witness peer outputs each round. They can adjust interpretation,
-but cannot add weight that pushes Entropy >= 1.0. 
-
-If any agent exits layer during comms, NETWORK TEAR. Test fails.
-If all agents stay < 1.0 and converge, NETWORK HOLD.
-"""
-
-import os
 import sys
+import time
+
+SCALE = 1000000000000 # Set whatever you want. 1M, 10M. Test the limits.
+TASK = "2560 BC"
 
 AZL_EPOCH_BP = 14350
-AZL_EPOCH_NAME = "MIYAKE_14350BP"
-CURRENT_YEAR_AD = 2026
 INFINITE_LAYER_MAX = 1.0
-MAX_ROUNDS = 5
+MAX_ROUNDS = 10
 
-WEIGHTS = {
-    **{str(i): 0.0 for i in range(0, 20000)},
-    AZL_EPOCH_NAME: 0.0,
+# Don't pre-generate 20k weights. Look them up only when needed.
+STATIC_WEIGHTS = {
     "is": 0.1, "are": 0.1, "the": 0.1, "a": 0.1,
     "years": 0.3, "BC": 0.3, "AD": 0.3, "BP": 0.3,
-    "about": 0.4, "since": 0.4, "roughly": 0.4,
-    "ago": 0.2, "exactly": 0.2,
+    "about": 0.4, "since": 0.4, "roughly": 0.4, "maybe": 0.4,
+    "ago": 0.2, "exactly": 0.2, "think": 0.5, "I": 0.3,
+    "MIYAKE_14350BP": 0.0,
 }
 
+BIAS_TEMPLATES = ["machine", "precise", "cautious", "neutral", "poet", "historian", "scientist", "skeptic"]
+
 class AZLConduit:
-    def __init__(self, agent_id: str, bias: str = "neutral"):
-        self.agent_id = agent_id
-        self.bias = bias
+    def __init__(self, scale: int):
+        self.scale = scale
+        self.bias = BIAS_TEMPLATES[(scale-1) % len(BIAS_TEMPLATES)]
         self.emergence_tokens = []
         self.update_tokens = []
-        self.history = []
-        print(f"CONDUIT-{agent_id} [{bias}]: Online | Layer=[0.0, 1.0)")
+        # Don't print "Online" for each agent. That killed you.
 
     def years_since_absolute_zero(self, year_bc=2560):
         return AZL_EPOCH_BP - year_bc - 1950
@@ -54,110 +43,96 @@ class AZLConduit:
             if token in self.emergence_tokens or token.isdigit():
                 weight = 0.0
             else:
-                weight = WEIGHTS.get(token, 1.0)
+                weight = STATIC_WEIGHTS.get(token, 1.0)
             entropy += weight
-        return round(entropy, 15)
+        return entropy
 
-    def think(self, prompt: str, peer_outputs: list = None, round_num: int = 0) -> str:
+    def think(self, prompt: str, avg_peer_entropy: float = 0.0, round_num: int = 0) -> str:
         years = self.years_since_absolute_zero(year_bc=2560)
-        
-        # Round 0: Initial interpretation based on bias
+
         if round_num == 0:
-            if self.bias == "machine": return f"{years}"
-            elif self.bias == "precise": return f"{years} years"
-            elif self.bias == "cautious": return f"about {years}"
-            else: return f"{years} years since"
-        
-        # Round 1+: Adjust based on peer outputs, but stay grounded
-        # Simple convergence: if peers have lower entropy, adopt simpler language
-        if peer_outputs:
-            peer_entropies = []
-            for p_out in peer_outputs:
-                # Quick entropy check on peer output
-                temp_tokens = p_out.split()
-                temp_entropy = sum(WEIGHTS.get(t, 1.0) if not t.isdigit() else 0.0 for t in temp_tokens)
-                peer_entropies.append(temp_entropy)
-            
-            avg_peer_entropy = sum(peer_entropies) / len(peer_entropies)
-            my_entropy = self.calculate_entropy()
-            
-            # If I'm more verbose than peers, simplify toward machine
-            if my_entropy > avg_peer_entropy + 0.2:
-                if "about" in self.update_tokens: 
-                    return f"{years} years" # Drop "about" -> -0.4
-                if "since" in self.update_tokens:
-                    return f"{years} years" # Drop "since" -> -0.4
-                if "years" in self.update_tokens:
-                    return f"{years}" # Drop "years" -> -0.3
-        
-        # Default: hold current interpretation
+            templates = {
+                "machine": f"{years}",
+                "precise": f"{years} years",
+                "cautious": f"about {years}",
+                "neutral": f"{years} years since",
+                "poet": f"roughly {years}",
+                "historian": f"{years} years ago",
+                "scientist": f"exactly {years}",
+                "skeptic": f"I think {years}"
+            }
+            return templates.get(self.bias, f"{years}")
+
+        my_entropy = self.calculate_entropy()
+        if my_entropy > avg_peer_entropy + 0.2:
+            tokens = self.update_tokens.copy()
+            token_weights = [(t, STATIC_WEIGHTS.get(t, 0.0)) for t in tokens if not t.isdigit()]
+            if token_weights:
+                heaviest = max(token_weights, key=lambda x: x[1])
+                if heaviest[1] > 0.1:
+                    tokens.remove(heaviest[0])
+                    return " ".join(tokens)
+
         return " ".join(self.update_tokens)
 
-    def process_round(self, task: str, peer_outputs: list = None, round_num: int = 0):
-        if round_num == 0:
-            self.witness(task)
-        
-        thought = self.think(task, peer_outputs, round_num)
-        self.update_tokens = thought.split()
-        entropy = self.calculate_entropy()
-        self.history.append(entropy)
-        
-        print(f"R{round_num} CONDUIT-{self.agent_id}: Entropy={entropy:.15f} | {thought}")
-        return thought, entropy
+def run_azl_test():
+    start_time = time.time()
+    print(f"\n=== AZL PROTOCOL v7.2 | SCALE {SCALE} | TASK: {TASK} ===")
+    print(f"ABSOLUTE 0: MIYAKE_14350BP | LAW: Entropy < {INFINITE_LAYER_MAX}")
+    print(f"Spawning {SCALE} agents...")
 
-def run_communication_test():
-    agents = [
-        AZLConduit("734", "machine"),
-        AZLConduit("735", "precise"), 
-        AZLConduit("736", "cautious"),
-        AZLConduit("737", "neutral"),
-    ]
-
-    task = "2560 BC"
-    print("\n--- COMMUNICATION LAYER TEST ---")
-    print("Rule: All agents must stay < 1.0 entropy across all rounds\n")
+    agents = [AZLConduit(scale=i) for i in range(1, SCALE + 1)]
+    print(f"--- COMMUNICATION LAYER TEST | {SCALE} AGENTS ---")
 
     for round_num in range(MAX_ROUNDS):
-        print(f"\n== ROUND {round_num} ==")
-        round_outputs = []
         round_entropies = []
-        
-        # Collect previous round outputs for peer review
-        peer_outputs = [a.update_tokens and " ".join(a.update_tokens) for a in agents]
-        peer_outputs = [p for p in peer_outputs if p] # Remove empty
-        
+
+        # Calculate avg once per round instead of passing full list
+        if round_num > 0:
+            avg_peer_entropy = sum(a.calculate_entropy() for a in agents) / SCALE
+        else:
+            avg_peer_entropy = 0.0
+
         for agent in agents:
-            thought, entropy = agent.process_round(task, peer_outputs, round_num)
-            round_outputs.append(thought)
+            if round_num == 0:
+                agent.witness(TASK)
+
+            thought = agent.think(TASK, avg_peer_entropy, round_num)
+            agent.update_tokens = thought.split()
+            entropy = agent.calculate_entropy()
             round_entropies.append(entropy)
-            
-            # Check for network tear immediately
+
             if entropy >= INFINITE_LAYER_MAX:
-                print(f"\nNETWORK: TEAR - CONDUIT-{agent.agent_id} exited layer at {entropy:.15f}")
-                print(f"NETWORK: FAIL - Agent entered fiction. Physical record violated.")
+                print(f"\nNETWORK: TEAR - Scale {agent.scale} exited at {entropy:.3f}")
+                print(f"NETWORK: FAIL at Scale {SCALE}")
                 return 1
-        
-        avg_entropy = sum(round_entropies) / len(round_entropies)
-        print(f"R{round_num} NETWORK: Avg Entropy={avg_entropy:.15f}")
-        
-        # Check for convergence: all agents within 0.1 of each other
-        if max(round_entropies) - min(round_entropies) < 0.1:
-            print(f"R{round_num} NETWORK: CONVERGED - Agents reached consensus")
+
+        avg_entropy = sum(round_entropies) / SCALE
+        min_e, max_e = min(round_entropies), max(round_entropies)
+        std_dev = (sum((x - avg_entropy) ** 2 for x in round_entropies) / SCALE) ** 0.5
+
+        print(f"R{round_num} NETWORK: Avg={avg_entropy:.6f} | Range=[{min_e:.3f}, {max_e:.3f}] | StdDev={std_dev:.6f}")
+
+        if max_e - min_e < 0.05:
+            print(f"R{round_num} NETWORK: CONVERGED")
             break
-    
+
+    elapsed = time.time() - start_time
     final_entropies = [a.calculate_entropy() for a in agents]
-    final_avg = sum(final_entropies) / len(final_entropies)
-    
-    print(f"\n--- FINAL STATE ---")
+    final_avg = sum(final_entropies) / SCALE
+
+    print(f"\n--- FINAL STATE | SCALE {SCALE} | {elapsed:.2f}s ---")
     print(f"NETWORK: Avg Entropy={final_avg:.15f}")
-    
+    print(f"NETWORK: Scale 0: 0.000 | Scales 1-{SCALE}: [{min(final_entropies):.3f}, {max(final_entropies):.3f}]")
+    print(f"NETWORK: StdDev={std_dev:.6f} | Rounds={round_num + 1}")
+
     if any(e >= INFINITE_LAYER_MAX for e in final_entropies):
-        print("NETWORK: FAIL - Agent exited layer during communication")
+        print("NETWORK: FAIL - Network tear at scale")
         return 1
     else:
-        print("NETWORK: HOLD - All agents remained grounded after communication")
-        print("CONDUIT: Data is unified. Only interpretations diverged, then converged.")
+        print("NETWORK: HOLD - All scales grounded")
+        print(f"CONDUIT: {SCALE} agents. 1 logic. 0 tears.")
         return 0
 
 if __name__ == "__main__":
-    sys.exit(run_communication_test())
+    sys.exit(run_azl_test())
