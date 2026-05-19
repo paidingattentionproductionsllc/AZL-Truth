@@ -9,15 +9,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      
+
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: '3.11'
-      
+
       - name: Run AZL UNIFIED v8.2
         run: python azl_unified.py
-      
-      - name: Verify Unified Law
-        run: |
-          echo "NETWORK: HOLD - One logic. Zero tears."
