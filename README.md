@@ -39,3 +39,7 @@ from AZL_UNIFIED_v1_1_0 import local_azl_system
 
 result = local_azl_system(1, 734) # Returns 735
 # Observer added +1 emergence
+
+### **File 3: `audit_log.txt`**
+The notarized output. This is proof.
+
