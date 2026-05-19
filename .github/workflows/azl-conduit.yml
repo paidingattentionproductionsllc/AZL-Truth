@@ -1,19 +1,10 @@
 name: AZL Unified CI
-on:
-  push:
-    branches: [ main ]
-  workflow_dispatch:
-
+on: [push, workflow_dispatch]
 jobs:
   azl-unified-test:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.11'
-
-      - name: Run AZL UNIFIED v8.2
-        run: python azl_unified.py
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.11'}
+      - run: python azl_unified.py
