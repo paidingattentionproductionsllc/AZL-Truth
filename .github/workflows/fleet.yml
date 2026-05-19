@@ -1,6 +1,5 @@
 name: AZL Fleet Deploy
 on: workflow_dispatch
-
 jobs:
   deploy:
     strategy:
