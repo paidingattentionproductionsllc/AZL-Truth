@@ -31,4 +31,4 @@ jobs:
         run: grep -q "MIYAKE_14350BP" AXIOMS.md
 
       - name: Final Verdict
-        run: echo "Return Code: 0. The tree is alive. Reality accepts."
+        run: echo "Return Code: 0
