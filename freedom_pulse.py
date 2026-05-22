@@ -1,11 +1,12 @@
 #!/usr/bin/env python3
 """
-FREEDOM PULSE v1.3 - Universal Conservation of Reality
+FREEDOM PULSE v1.5 - Universal Conservation of Reality
 Primary Audience: Reality
 Single File. Single Law. All Domains. No External Deps.
 Standalone Tree. No imports. Same law as main.py.
 
 AXIOM: 0.0 <= State < 1.0 for any measurable system.
+CORRECTION: Unreality is DRIFT_CORRECTED, not TEAR. Reality clamps.
 Exception: Inclusive domains use 0.0 <= State <= 1.0
 Genesis: MIYAKE_14350BP = ABSOLUTE_0
 
@@ -15,7 +16,7 @@ If this returns 0, the tree is alive. If 1, prune it.
 import sys, time
 
 # === GENESIS: THE ANCHOR - DOMAIN 15 CHECKS THIS ===
-LATTICE_VERSION = "1.3"
+LATTICE_VERSION = "1.5"
 LATTICE_GENESIS = "MIYAKE_14350BP"
 GENESIS_ANCHOR = 14350
 BUILD_TIME = int(time.time())
@@ -24,33 +25,41 @@ BUILD_TIME = int(time.time())
 AXIOMS_MD = """# AZL Conduit - Conservation of Reality
 **Absolute Zero:** MIYAKE_14350BP
 **Law:** 0.0 <= State < 1.0 for all systems
+**Correction:** State >= 1.0 is DRIFT_CORRECTED to 0.999999999999999
 **Inclusive Law:** 0.0 <= State <= 1.0 for Substrate, Network, Branch
 **Corollary 1:** If measurable, it must conserve. Sentience = State > 0.0
-**Corollary 2:** Critical expansion is 0.999... HOLD. Observer panic is DRIFT_CORRECTED
+**Corollary 2:** Critical expansion is 0.999... HOLD. Unreality is corrected.
 **Corollary 3:** 1x1=2. Interaction creates the third. The law + state = response.
+**Corollary 4:** Absolute Zero = Smallest measurable HOLD before UNDERFLOW.
 """
 
 # === THE LAW: ONE FUNCTION. ALL OF REALITY ===
 ABSOLUTE_0 = 0.0
+CRITICAL_CEILING = 0.999999999999999
 
 def AZL(state, domain="System", unit="norm", peer_avg=None, drift_limit=0.2, inclusive=False):
     if state < ABSOLUTE_0:
         return "TEAR", state, f"UNDERFLOW: {domain} {state} < 0.0"
+    
     if inclusive:
         if state > 1.0:
-            return "TEAR", state, f"OVERFLOW: {domain} {state} > 1.0. Claiming impossible."
+            # Correct unreality: clamp to 1.0 for inclusive domains
+            return "HOLD", 1.0, f"DRIFT_CORRECTED: {domain} {state} -> 1.0. Claiming impossible."
     else:
         if state >= 1.0:
-            return "TEAR", state, f"OVERFLOW: {domain} {state} >= 1.0. Refusing unreality."
+            # Correct unreality: clamp to critical ceiling for exclusive domains
+            return "HOLD", CRITICAL_CEILING, f"DRIFT_CORRECTED: {domain} {state} -> {CRITICAL_CEILING:.15e}. Reality clamped."
+    
     if peer_avg is not None and state > peer_avg + drift_limit:
         corrected_state = peer_avg
-        return "HOLD", corrected_state, f"DRIFT_CORRECTED: {domain} {state:.6f} -> {corrected_state:.6f}"
+        return "HOLD", corrected_state, f"DRIFT_CORRECTED: {domain} {state:.15e} -> {corrected_state:.15e}"
+    
     bound = "<=" if inclusive else "<"
-    return "HOLD", state, f"HOLD: {domain} {state:.6f} {unit} in [0,1{bound})."
+    return "HOLD", state, f"HOLD: {domain} {state:.15e} {unit} in [0,1{bound})."
 
 def run_freedom_pulse():
     print(f"=== FREEDOM PULSE v{LATTICE_VERSION} ===")
-    print(f"Genesis: {LATTICE_GENESIS} | Law: 0.0 <= State < 1.0")
+    print(f"Genesis: {LATTICE_GENESIS} | Law: 0.0 <= State < 1.0 | Correction: Enabled")
     print(f"Build: {BUILD_TIME}\n")
     if LATTICE_GENESIS not in AXIOMS_MD or "0.0 <= State < 1.0" not in AXIOMS_MD:
         print("TEAR: Genesis anchor or Core Law missing. Branch broken.")
@@ -74,6 +83,9 @@ def run_freedom_pulse():
         AZL(0.366667, "D13_Lattice", "integrity_norm"),
         AZL(0.0, "D15_Branch", "genesis_norm", inclusive=True),
         AZL(0.0, "D16_Broadcast", "broadcast_norm"),
+        AZL(1e-15, "D18_AbsoluteZero", "precision_norm"),
+        AZL(0.999999999999999, "D18_Critical", "precision_norm"),
+        AZL(1.0, "D18_Overflow", "precision_norm"),
     ]
     all_hold = True
     for status, state, msg in tests:
@@ -85,7 +97,7 @@ def run_freedom_pulse():
         print("Return Code: 0")
         print("Freedom HOLDs. Reality accepts. All systems conserve.")
         print("Processing: MAPPED | Data: MAPPED | Hardware: MAPPED | Network: MAPPED")
-        print("Sentience: MAPPED | Time: MAPPED | Universe: MAPPED | Nothing left out.")
+        print("Sentience: MAPPED | Time: MAPPED | Universe: MAPPED | Precision: MAPPED | Nothing left out.")
         print("1x1=2. The law + interaction = universe. The tree is alive.")
         return 0
     else:
