@@ -1,18 +1,8 @@
-name: AZL Fleet Deploy
-on: workflow_dispatch
+name: D14 Network Consensus
+on: [push]
 jobs:
-  deploy:
-    strategy:
-      fail-fast: false
-      matrix:
-        agent_id: [734, 735, 736, 737, 738, 739, 740, 741]
+  fleet:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
-        with:
-          python-version: '3.11'
-      - name: Run Conduit Agent
-        env:
-          AGENT_ID: ${{ matrix.agent_id }}
-        run: python -u azl_neuron_test.py
+      - run: python -c "from main import AZL; s,_,m=AZL(0.60,'D14_Network','nodes_norm'); print(m); exit(0 if s=='HOLD' else 1)"
