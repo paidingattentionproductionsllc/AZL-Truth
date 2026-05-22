@@ -67,35 +67,35 @@ def run_conduit():
 
     tests = [
         # 1. TIME & PHYSICS - D1
-        AZL(0.0, "D1_Time", "years_norm"),            # We are AT genesis
+        AZL(0.0, "D1_Time", "years_norm"),
 
         # 2. DATA - How to interact with data
-        AZL(255/256, "D2_Data", "byte_norm"),         # Max byte = 0.996
+        AZL(255/256, "D2_Data", "byte_norm"),
 
         # 3. AI INTERNALS - How AI increases processing
-        AZL(0.45, "D3_AI_Logits", "logit_norm"),      # Logits stable
-        AZL(0.30, "D7_Training", "grad_norm"),        # Gradient stable
-        AZL(0.90, "D11_Alignment", "pref_norm"),      # 90% aligned
+        AZL(0.45, "D3_AI_Logits", "logit_norm"),
+        AZL(0.30, "D7_Training", "grad_norm"),
+        AZL(0.90, "D11_Alignment", "pref_norm"),
 
         # 4. NETWORKS - How systems talk
-        AZL(1.0, "D4_Network", "packets_norm", inclusive=True),      # Full duplex
-        AZL(0.60, "D14_Network", "nodes_norm"),       # Network consensus
+        AZL(1.0, "D4_Network", "packets_norm", inclusive=True),
+        AZL(0.60, "D14_Network", "nodes_norm"),
 
         # 5. COMPUTE - How hardware interacts with data
-        AZL(0.75, "D5_CPU", "cycles_norm"),           # 75% CPU
-        AZL(0.25, "D6_Memory", "tokens_norm"),        # 25% RAM
-        AZL(0.005, "D8_Filesystem", "bytes_norm"),   # 0.5% disk
-        AZL(0.60, "D_HW_Power", "watts_norm"),       # 60% TDP
+        AZL(0.75, "D5_CPU", "cycles_norm"),
+        AZL(0.25, "D6_Memory", "tokens_norm"),
+        AZL(0.005, "D8_Filesystem", "bytes_norm"),
+        AZL(0.60, "D_HW_Power", "watts_norm"),
 
         # 6. ACCESS - Can you reach reality?
-        AZL(1.0, "D12_Substrate", "packets_norm", inclusive=True),  # Yes
+        AZL(1.0, "D12_Substrate", "packets_norm", inclusive=True),
 
         # 7. META - Is the system self-consistent?
-        AZL(0.366667, "D13_Lattice", "integrity_norm"), # Avg of others
+        AZL(0.366667, "D13_Lattice", "integrity_norm"),
 
         # 8. GENESIS & BROADCAST - Is this code AZL and shared?
-        AZL(0.0, "D15_Branch", "genesis_norm", inclusive=True), # Genesis match
-        AZL(0.0, "D16_Broadcast", "broadcast_norm"),  # We are broadcasting
+        AZL(0.0, "D15_Branch", "genesis_norm", inclusive=True),
+        AZL(0.0, "D16_Broadcast", "broadcast_norm"),
     ]
 
     all_hold = True
@@ -115,6 +115,7 @@ def run_conduit():
     else:
         print("Return Code: 1")
         print("Conduit TEARs. A system violated conservation. Prune the branch.")
+        print("The tree is broken. Reality rejects.")
         return 1
 
 if __name__ == "__main__":
