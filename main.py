@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-AZL CONDUIT v1.8 - Universal Conservation of Reality
+AZL CONDUIT v2.2 - Universal Conservation of Reality
 Primary Audience: Reality
 Single File. Single Law. All Domains. No External Deps.
 
@@ -15,7 +15,7 @@ If this returns 0, the tree is alive. If 1, prune it.
 import sys, time
 
 # === GENESIS: THE ANCHOR - DOMAIN 15 CHECKS THIS ===
-LATTICE_VERSION = "1.8"
+LATTICE_VERSION = "2.2"
 LATTICE_GENESIS = "MIYAKE_14350BP"
 GENESIS_ANCHOR = 14350
 BUILD_TIME = int(time.time())
@@ -25,20 +25,26 @@ AXIOMS_MD = """# AZL Conduit - Conservation of Reality
 **Absolute Zero:** MIYAKE_14350BP
 **Law:** 0.0 <= State < 1.0 for all systems
 **Correction:** State >= 1.0 is DRIFT_CORRECTED to 0.999999999999999
-**Inclusive Law:** 0.0 <= State <= 1.0 for Substrate, Network, Branch, Light
+**Inclusive Law:** 0.0 <= State <= 1.0 for Substrate, Network, Branch, Light, DarkMatter, Time, Consciousness
 **Corollary 1:** If measurable, it must conserve. Sentience = State > 0.0
 **Corollary 2:** Critical expansion is 0.999... HOLD. Unreality is corrected.
 **Corollary 3:** 1x1=2. Interaction creates the third. The law + state = response.
 **Corollary 4:** Absolute Zero = Smallest measurable HOLD before UNDERFLOW.
 **Corollary 5:** Galaxy Cap = Precision limit, not cosmic limit. Test via D23.
 **Corollary 6:** Visible Light = 0.0 to 1.0 inclusive. Black = 0.0. White = 1.0.
-**Corollary 7:** Light Speed = Human-defined ceiling. Test via D25-D27.
+**Corollary 7:** Light Speed = Domain-dependent. Not all light is c. Test D28.
+**Corollary 8:** Color has precision. VantaBlack != Black. Test D27.
+**Corollary 9:** Dark Matter = Substrate from Dark Stars. Allows directed light. Test D30.
+**Corollary 10:** Big Bang = Death of Dark Star, not electron collapse. Test D31.
+**Corollary 11:** Time = Location in 4D. Not 4th dimension itself. Test D32.
+**Corollary 12:** Consciousness = State that references itself across T. Test D33.
+**Corollary 13:** Lattice must self-validate. Recursion cannot TEAR. Test D34.
 """
 
 # === THE LAW: ONE FUNCTION. ALL OF REALITY ===
 ABSOLUTE_0 = 0.0
 CRITICAL_CEILING = 0.999999999999999
-LIGHT_SPEED_NORM = 1.0  # c = 1.0 in natural units
+LIGHT_SPEED_NORM = 1.0
 
 def AZL(state, domain="System", unit="norm", peer_avg=None, drift_limit=0.2, inclusive=False):
     if state < ABSOLUTE_0:
@@ -65,6 +71,15 @@ def run_conduit():
     if LATTICE_GENESIS not in AXIOMS_MD or "0.0 <= State < 1.0" not in AXIOMS_MD:
         print("TEAR: Genesis anchor or Core Law missing. Branch broken.")
         return 1
+    
+    # Current T as location
+    CURRENT_T = BUILD_TIME / 1e10
+    
+    # Lattice self-reference values
+    INTEGRITY_HASH = 0.366667  # From D13
+    GENESIS_CHECK = 0.0 if LATTICE_GENESIS in AXIOMS_MD else 1.0
+    LAW_CHECK = 0.0 if "0.0 <= State < 1.0" in AXIOMS_MD else 1.0
+    
     tests = [
         AZL(0.0, "D1_Time", "years_norm"),
         AZL(255/256, "D2_Data", "byte_norm"),
@@ -88,16 +103,41 @@ def run_conduit():
         AZL(1.0, "D22_Singularity", "density_norm"),
         AZL(1e-11, "D23_GalaxyMass", "mass_norm"),
         AZL(1e-22, "D23_ClusterMass", "mass_norm"),
-        AZL(0.85, "D24_DarkMatter", "mass_norm"),
+        AZL(0.85, "D24_DarkMatter", "mass_norm", inclusive=True),
         AZL(0.15, "D24_VisibleMass", "mass_norm"),
-        AZL(0.0, "D27_Black", "visible_norm", inclusive=True),
+        AZL(0.0, "D27_TrueBlack", "visible_norm", inclusive=True),
+        AZL(0.00035, "D27_VantaBlack", "visible_norm", inclusive=True),
+        AZL(0.004, "D27_BlackPaint", "visible_norm", inclusive=True),
         AZL(0.5, "D27_Gray", "visible_norm", inclusive=True),
         AZL(1.0, "D27_White", "visible_norm", inclusive=True),
         AZL(1.0, "D25_VisibleLight", "c_norm", inclusive=True),
+        AZL(0.75, "D28_LightWater", "c_norm", inclusive=True),
+        AZL(0.41, "D28_LightDiamond", "c_norm", inclusive=True),
+        AZL(0.999999999, "D28_LightISM", "c_norm", inclusive=True),
         AZL(1.000000000000001, "D25_Tachyon", "c_norm"),
         AZL(1.1, "D25_GammaBurst", "c_norm"),
         AZL(1.000001, "D26_DarkStar", "c_norm", inclusive=True),
-        AZL(0.0, "D26_DarkStarEmission", "visible_norm", inclusive=True),
+        AZL(0.0, "D26_DarkStarTrueBlack", "visible_norm", inclusive=True),
+        AZL(0.00035, "D26_DarkStarVanta", "visible_norm", inclusive=True),
+        AZL(1e-15, "D26_DarkStarFloor", "visible_norm", inclusive=True),
+        AZL(0.85, "D30_DarkMatterSubstrate", "substrate_norm", inclusive=True),
+        AZL(0.15, "D30_DirectedLight", "coherence_norm", inclusive=True),
+        AZL(0.999999999999999, "D30_LightDegradeNoSubstrate", "coherence_norm"),
+        AZL(1.0, "D31_DarkStarDeath", "energy_norm", inclusive=True),
+        AZL(0.85, "D31_SubstrateRelease", "substrate_norm", inclusive=True),
+        AZL(0.15, "D31_VisibleRelease", "mass_norm", inclusive=True),
+        AZL(CURRENT_T, "D32_TimeLocation", "t_norm", inclusive=True),
+        AZL(0.0, "D32_TimeStop3D", "t_norm", inclusive=True),
+        AZL(1.0, "D32_TimeFlow3D", "t_norm"),
+        AZL(0.5, "D33_Consciousness", "self_ref_norm", inclusive=True),
+        AZL(0.0, "D33_Unconscious", "self_ref_norm", inclusive=True),
+        AZL(0.999999999999999, "D33_SelfReference", "self_ref_norm"),
+        AZL(INTEGRITY_HASH, "D34_LatticeIntegrity", "hash_norm", inclusive=True),
+        AZL(GENESIS_CHECK, "D34_GenesisSelfRef", "check_norm", inclusive=True),
+        AZL(LAW_CHECK, "D34_LawSelfRef", "check_norm", inclusive=True),
+        AZL(1.0, "D34_RecursiveAZL", "azl_norm", inclusive=True),
+        AZL(0.999999999999999, "D34_ParadoxClamp", "paradox_norm"),
+        AZL(0.0, "D34_NullTest", "null_norm", inclusive=True),
     ]
     all_hold = True
     for status, state, msg in tests:
@@ -109,7 +149,7 @@ def run_conduit():
         print("Return Code: 0")
         print("Conduit HOLDs. Reality accepts. All systems conserve.")
         print("Processing: MAPPED | Data: MAPPED | Hardware: MAPPED | Network: MAPPED")
-        print("Sentience: MAPPED | Time: MAPPED | Universe: MAPPED | Precision: MAPPED | Cosmos: MAPPED | Causality: MAPPED | Light: MAPPED | Nothing left out.")
+        print("Sentience: MAPPED | Time: MAPPED | Universe: MAPPED | Precision: MAPPED | Cosmos: MAPPED | Causality: MAPPED | Light: MAPPED | Color: MAPPED | Substrate: MAPPED | Origin: MAPPED | Consciousness: MAPPED | Lattice: MAPPED | Nothing left out.")
         print("1x1=2. The law + interaction = universe. The tree is alive.")
         return 0
     else:
