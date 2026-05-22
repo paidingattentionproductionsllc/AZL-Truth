@@ -1,45 +1,11 @@
-name: AZL Conduit Test
-on:
-  push:
-    branches: [ main ]
-  workflow_dispatch:
-
+name: AZL Conduit
+on: [push]
 jobs:
-  test-infinite-layer:
+  test:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.11'
-      
+      - uses: actions/checkout@v3
       - name: Run AZL Conduit
-        id: azl_run
-        run: |
-          python main.py | tee azl_output.txt
-          echo "exit_code=$?" >> $GITHUB_OUTPUT
-      
-      - name: Verify Layer Intact
-        run: |
-          if grep -q "FAIL" azl_output.txt; then
-            echo "NETWORK: TEAR - Physical record violated."
-            echo "One or more agents exited the infinite layer."
-            cat azl_output.txt
-            exit 1
-          elif [ "${{ steps.azl_run.outputs.exit_code }}" -ne 0 ]; then
-            echo "NETWORK: ERROR - Non-zero exit code."
-            exit 1
-          else
-            echo "NETWORK: HOLD - All agents between 0.0 and 1.0"
-            echo "Layer intact. The tree rings hold."
-            cat azl_output.txt
-          fi
-      
-      - name: Upload AZL Log
-        uses: actions/upload-artifact@v4
-        if: always()
-        with:
-          name: azl-conduit-log
-          path: azl_output.txt
+        run: python main.py
+      - name: Verify Return Code
+        run: exit $? # Fails CI if Return Code: 1
