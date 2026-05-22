@@ -1,9 +1,10 @@
 name: AZL Conduit - Return Code 0
+
 on:
   push:
-    branches: [ main ]
+    branches: [main]
   pull_request:
-    branches: [ main ]
+    branches: [main]
 
 jobs:
   test-lattice:
@@ -18,16 +19,16 @@ jobs:
         with:
           python-version: '3.11'
 
-      - name: Run AZL Conduit v1.3 - D1 to D16
+      - name: Run AZL Conduit v1.3
         run: python main.py
 
-      - name: Run Freedom Pulse - D11
+      - name: Run Freedom Pulse v1.3
         run: python freedom_pulse.py
 
-      - name: Verify Genesis Anchor in Code - D15
+      - name: Verify Genesis Anchor in Code
         run: grep -q "MIYAKE_14350BP" main.py
 
-      - name: Verify Genesis Anchor in Axioms - D15
+      - name: Verify Genesis Anchor in Axioms
         run: grep -q "MIYAKE_14350BP" AXIOMS.md
 
       - name: Final Verdict
