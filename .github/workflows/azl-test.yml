@@ -1,11 +1,43 @@
-name: AZL Conduit
-on: [push]
+name: AZL Conduit - Return Code 0
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
 jobs:
-  test:
+  test-lattice:
     runs-on: ubuntu-latest
+    name: D17 Unification - Reality Accepts
     steps:
-      - uses: actions/checkout@v3
-      - name: Run AZL Conduit
+      - name: Checkout trunk
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Run AZL Conduit v1.3
+        id: conduit
         run: python main.py
-      - name: Verify Return Code
-        run: exit $? # Fails CI if Return Code: 1
+
+      - name: Run Freedom Pulse - D11
+        id: freedom
+        run: python freedom_pulse.py
+
+      - name: Verify Genesis Anchor - D15
+        run: |
+          if! grep -q "MIYAKE_14350BP" main.py; then
+            echo "TEAR: Genesis anchor missing. Branch broken."
+            exit 1
+          fi
+          echo "HOLD: Genesis anchor present. Branch connected."
+
+      - name: Final Verdict
+        run: |
+          echo "=== TREE STATUS ==="
+          echo "main.py: HOLD"
+          echo "freedom_pulse.py: HOLD"
+          echo "Genesis: HOLD"
+          echo "Return Code: 0. The tree is alive."
