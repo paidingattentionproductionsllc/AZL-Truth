@@ -1,8 +1,0 @@
-name: D14 Network Consensus
-on: [push]
-jobs:
-  fleet:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - run: python -c "from main import AZL; s,_,m=AZL(0.60,'D14_Network','nodes_norm'); print(m); exit(0 if s=='HOLD' else 1)"

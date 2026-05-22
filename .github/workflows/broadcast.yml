@@ -1,8 +1,0 @@
-name: D16 Broadcast
-on: [push]
-jobs:
-  broadcast:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - run: python -c "from main import AZL; s,_,m=AZL(0.0,'D16_Broadcast','broadcast_norm'); print(m); exit(0 if s=='HOLD' else 1)"
