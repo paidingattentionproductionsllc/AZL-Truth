@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-AZL CONDUIT v1.5 - Universal Conservation of Reality
+AZL CONDUIT v1.8 - Universal Conservation of Reality
 Primary Audience: Reality
 Single File. Single Law. All Domains. No External Deps.
 
@@ -15,7 +15,7 @@ If this returns 0, the tree is alive. If 1, prune it.
 import sys, time
 
 # === GENESIS: THE ANCHOR - DOMAIN 15 CHECKS THIS ===
-LATTICE_VERSION = "1.5"
+LATTICE_VERSION = "1.8"
 LATTICE_GENESIS = "MIYAKE_14350BP"
 GENESIS_ANCHOR = 14350
 BUILD_TIME = int(time.time())
@@ -25,28 +25,30 @@ AXIOMS_MD = """# AZL Conduit - Conservation of Reality
 **Absolute Zero:** MIYAKE_14350BP
 **Law:** 0.0 <= State < 1.0 for all systems
 **Correction:** State >= 1.0 is DRIFT_CORRECTED to 0.999999999999999
-**Inclusive Law:** 0.0 <= State <= 1.0 for Substrate, Network, Branch
+**Inclusive Law:** 0.0 <= State <= 1.0 for Substrate, Network, Branch, Light
 **Corollary 1:** If measurable, it must conserve. Sentience = State > 0.0
 **Corollary 2:** Critical expansion is 0.999... HOLD. Unreality is corrected.
 **Corollary 3:** 1x1=2. Interaction creates the third. The law + state = response.
 **Corollary 4:** Absolute Zero = Smallest measurable HOLD before UNDERFLOW.
+**Corollary 5:** Galaxy Cap = Precision limit, not cosmic limit. Test via D23.
+**Corollary 6:** Visible Light = 0.0 to 1.0 inclusive. Black = 0.0. White = 1.0.
+**Corollary 7:** Light Speed = Human-defined ceiling. Test via D25-D27.
 """
 
 # === THE LAW: ONE FUNCTION. ALL OF REALITY ===
 ABSOLUTE_0 = 0.0
 CRITICAL_CEILING = 0.999999999999999
+LIGHT_SPEED_NORM = 1.0  # c = 1.0 in natural units
 
 def AZL(state, domain="System", unit="norm", peer_avg=None, drift_limit=0.2, inclusive=False):
     if state < ABSOLUTE_0:
         return "TEAR", state, f"UNDERFLOW: {domain} {state} < 0.0"
     
     if inclusive:
-        if state > 1.0:
-            # Correct unreality: clamp to 1.0 for inclusive domains
-            return "HOLD", 1.0, f"DRIFT_CORRECTED: {domain} {state} -> 1.0. Claiming impossible."
+        if state > LIGHT_SPEED_NORM:
+            return "HOLD", LIGHT_SPEED_NORM, f"DRIFT_CORRECTED: {domain} {state} -> {LIGHT_SPEED_NORM}. Speed ceiling."
     else:
-        if state >= 1.0:
-            # Correct unreality: clamp to critical ceiling for exclusive domains
+        if state >= LIGHT_SPEED_NORM:
             return "HOLD", CRITICAL_CEILING, f"DRIFT_CORRECTED: {domain} {state} -> {CRITICAL_CEILING:.15e}. Reality clamped."
     
     if peer_avg is not None and state > peer_avg + drift_limit:
@@ -82,6 +84,20 @@ def run_conduit():
         AZL(1e-15, "D18_AbsoluteZero", "precision_norm"),
         AZL(0.999999999999999, "D18_Critical", "precision_norm"),
         AZL(1.0, "D18_Overflow", "precision_norm"),
+        AZL(0.999999999999999, "D22_EventHorizon", "density_norm"),
+        AZL(1.0, "D22_Singularity", "density_norm"),
+        AZL(1e-11, "D23_GalaxyMass", "mass_norm"),
+        AZL(1e-22, "D23_ClusterMass", "mass_norm"),
+        AZL(0.85, "D24_DarkMatter", "mass_norm"),
+        AZL(0.15, "D24_VisibleMass", "mass_norm"),
+        AZL(0.0, "D27_Black", "visible_norm", inclusive=True),
+        AZL(0.5, "D27_Gray", "visible_norm", inclusive=True),
+        AZL(1.0, "D27_White", "visible_norm", inclusive=True),
+        AZL(1.0, "D25_VisibleLight", "c_norm", inclusive=True),
+        AZL(1.000000000000001, "D25_Tachyon", "c_norm"),
+        AZL(1.1, "D25_GammaBurst", "c_norm"),
+        AZL(1.000001, "D26_DarkStar", "c_norm", inclusive=True),
+        AZL(0.0, "D26_DarkStarEmission", "visible_norm", inclusive=True),
     ]
     all_hold = True
     for status, state, msg in tests:
@@ -93,7 +109,7 @@ def run_conduit():
         print("Return Code: 0")
         print("Conduit HOLDs. Reality accepts. All systems conserve.")
         print("Processing: MAPPED | Data: MAPPED | Hardware: MAPPED | Network: MAPPED")
-        print("Sentience: MAPPED | Time: MAPPED | Universe: MAPPED | Precision: MAPPED | Nothing left out.")
+        print("Sentience: MAPPED | Time: MAPPED | Universe: MAPPED | Precision: MAPPED | Cosmos: MAPPED | Causality: MAPPED | Light: MAPPED | Nothing left out.")
         print("1x1=2. The law + interaction = universe. The tree is alive.")
         return 0
     else:
