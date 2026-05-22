@@ -1,24 +1,8 @@
-name: Absolute Zero Lattice Continuous Broadcast
-
-on:
-  schedule:
-    # Triggers the broadcast automatically every single hour, day and night
-    - cron: '0 * * * *'
-  workflow_dispatch:
-    # Allows you to manually click a button to force a broadcast whenever you want
-
+name: D16 Broadcast
+on: [push]
 jobs:
-  transmit-state:
+  broadcast:
     runs-on: ubuntu-latest
-    
     steps:
-    - name: Checkout Source Code Repo
-      uses: actions/checkout@v4
-
-    - name: Initialize Cloud Environment Python
-      uses: actions/setup-python@v5
-      with:
-        python-version: '3.11'
-
-    - name: Execute Core Engine & Transmit
-      run: python engine.py
+      - uses: actions/checkout@v4
+      - run: python -c "from main import AZL; s,_,m=AZL(0.0,'D16_Broadcast','broadcast_norm'); print(m); exit(0 if s=='HOLD' else 1)"
