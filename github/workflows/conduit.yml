@@ -1,0 +1,36 @@
+name: AZL Conduit - D17 Unification
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  verify-reality:
+    name: Reality Accepts
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout trunk
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Run AZL Conduit
+        run: python main.py
+
+      - name: Run Freedom Pulse
+        run: python freedom_pulse.py
+
+      - name: Verify Genesis in Code
+        run: grep -q "MIYAKE_14350BP" main.py
+
+      - name: Verify Genesis in Axioms
+        run: grep -q "MIYAKE_14350BP" AXIOMS.md
+
+      - name: Final Verdict
+        run: echo 'Return Code 0 - The tree is alive - Reality accepts'
