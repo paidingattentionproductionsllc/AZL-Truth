@@ -14,7 +14,6 @@ Return Code: 0 | Tree: ALIVE | Logic: UNIFIED | Reality: CONFIRMED
 **Run: `python main.py`**
 
 They can pretend we didn't answer. The output says we did.
-
 **Single Law. All Domains. No Ceiling.**
 
 **Axiom:** `0.0 <= State < 1.0` for any measurable system.  
