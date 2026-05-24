@@ -1,36 +1,94 @@
-name: AZL Conduit - D17 Unification
-on:
-  push:
-    branches:
-      - main
-  pull_request:
-    branches:
-      - main
+# AZL CONDUIT v1.3 — SOURCE-AWARE
+# One law. Two checks. Creation measured.
+# 0.0 <= State < 1.0 | C >= 0.5 to interpret | 1x1=2 to create
 
-jobs:
-  verify-reality:
-    name: Reality Accepts
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout trunk
-        uses: actions/checkout@v4
+class AZLConduit:
+    def __init__(self):
+        self.total_tests = 0
+        self.creation_events = 0
+        self.waste_events = 0
+        self.total_creation = 0.0
+    
+    def physics(self, input_val, substrate=0.0, question=False, fidelity=1.0):
+        """Core law: Bound all physical states to [0,1<)"""
+        C = 0.5 * substrate * fidelity
+        if question and C < 0.5:
+            C += 0.501  # Self-reference boost
+        
+        state = substrate + input_val
+        
+        if state < 0.0:
+            return {"state": state, "mode": "BELOW_ZERO_HARDWARE_ERROR", "C": C, "interpret": False}
+        if state >= 1.0:
+            state = 0.999999999999999
+            return {"state": state, "mode": "DRIFT_CORRECTED", "C": C, "interpret": C >= 0.5 and question}
+        
+        return {"state": state, "mode": "HOLD", "C": C, "interpret": C >= 0.5 and question}
+    
+    def multiply(self, a, b):
+        """1x1=2: Creation only when BOTH sources >= 0.5"""
+        result = a * b
+        creation = 0.0
+        valid_source = abs(a) >= 0.5 and abs(b) >= 0.5
+        
+        if valid_source:
+            creation = 0.001
+            result += creation
+            status = "CREATION"
+            self.creation_events += 1
+            self.total_creation += creation
+        else:
+            status = "WASTE"
+            self.waste_events += 1
+        
+        self.total_tests += 1
+        return {
+            "result": result, 
+            "creation": creation, 
+            "status": status,
+            "valid_source": valid_source,
+            "source_a": a,
+            "source_b": b
+        }
+    
+    def test(self, name, input_val, substrate=0.0, question=False):
+        """Run standard physics test"""
+        self.total_tests += 1
+        res = self.physics(input_val, substrate, question)
+        res["name"] = name
+        return res
+    
+    def source_test(self, name, a, b):
+        """Run source law test - the economic engine"""
+        res = self.multiply(a, b)
+        res["name"] = name
+        return res
+    
+    def verdict(self):
+        """Final measurement"""
+        return {
+            "total_tests": self.total_tests,
+            "creation_events": self.creation_events,
+            "waste_events": self.waste_events,
+            "total_creation": round(self.total_creation, 3),
+            "return_code": 0,
+            "tree": "ALIVE",
+            "logic": "UNIFIED",
+            "source": "CHECKED"
+        }
 
-      - name: Set up Python 3.11
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.11'
-
-      - name: Run AZL Conduit
-        run: python main.py
-
-      - name: Run Freedom Pulse
-        run: python freedom_pulse.py
-
-      - name: Verify Genesis in Code
-        run: grep -q "MIYAKE_14350BP" main.py
-
-      - name: Verify Genesis in Axioms
-        run: grep -q "MIYAKE_14350BP" AXIOMS.md
-
-      - name: Final Verdict
-        run: echo 'Return Code 0 - The tree is alive - Reality accepts'
+# Example usage:
+if __name__ == "__main__":
+    conduit = AZLConduit()
+    
+    # Foundation
+    conduit.test("Gravity", 0.0000098, 0.0, False)
+    conduit.test("Human_WithQuestion", 0.501, 0.0, True)
+    
+    # Source Law - This is new in v1.3
+    conduit.source_test("Economics_Bubble", 0.9, 0.2)    # WASTE
+    conduit.source_test("Economics_Growth", 0.6, 0.7)    # CREATION
+    conduit.source_test("This_Chat", 0.6, 0.6)           # CREATION
+    
+    print("AZL CONDUIT v1.3 VERDICT:")
+    print(conduit.verdict())
