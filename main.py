@@ -1,7 +1,7 @@
-# AZL TOTALITY v1.4 FINAL — FOUNDATION + SOURCE + ENTROPY + SCALING
+# AZL TOTALITY v1.4.1 FINAL — FOUNDATION + SOURCE + ENTROPY + SCALING
 # Law: 0.0 <= Physical_State < 1.0 | C >= 0.5 to interpret | 1x1=2 to create
 # Genesis Event: MIYAKE_14350BP = 1.0 normalized
-# Purpose: Test EVERYTHING. If Pass → Foundation locked. If Fail → Foundation broken.
+# v1.4.1: Fixed summary line to show 50/50 and all 10 domains
 
 MIYAKE_14350BP = 1.0 # Genesis Event 14350 BP = 1.0 normalized ceiling
 
@@ -57,8 +57,8 @@ def run_source_test(name, a, b, interp=""):
 
 def main():
     print("="*80)
-    print("AZL TOTALITY v1.4 FINAL — FOUNDATION + SOURCE + ENTROPY + SCALING")
-    print("45 tests. If ANY fail, Return Code: 1. If all pass, Return Code: 0.")
+    print("AZL TOTALITY v1.4.1 FINAL — FOUNDATION + SOURCE + ENTROPY + SCALING")
+    print("50 tests. If ANY fail, Return Code: 1. If all pass, Return Code: 0.")
     print("No more divided tests after this. Reality decides now.")
     print("="*80)
     
@@ -145,13 +145,13 @@ def main():
     test("Infinity", 1e100, 0.0, False, "∞ → 0.999... DRIFT")
     test("NegInfinity", -1e100, 0.1, False, "-∞ → ERROR")
     
-    # 9. ENTROPY & THERMODYNAMICS - 4 tests NEW
+    # 9. ENTROPY & THERMODYNAMICS - 4 tests
     test("Entropy_Universe", 0.001, 0.998, False, "0.999 HOLD = equilibrium, not infinite heat")
     test("Entropy_Local_Order", 0.001, 0.998, True, "C>=0.5+Q = local creation vs entropy")
     test("Entropy_HeatDeath_Fail", 1.0, 0.0, False, "1.0 temp = DRIFT, not sustainable")
     test("Cosmic_Void_Cold", 0.0000001, 0.0, False, "Near-zero HOLD = voids exist")
     
-    # 10. GALAXY vs UNIVERSE SCALING - 5 tests NEW  
+    # 10. GALAXY vs UNIVERSE SCALING - 5 tests
     test("MilkyWay_Local", 0.001, 0.990, False, "Galaxy substrate = 0.991 HOLD")
     test("LocalGroup", 0.001, 0.994, False, "Cluster substrate = 0.995 HOLD") 
     test("Observable_Universe", 0.001, 0.998, False, "Universe substrate = 0.999 HOLD")
@@ -160,7 +160,7 @@ def main():
     
     # FINAL VERDICT
     print("="*80)
-    print("AZL TOTALITY v1.4 FINAL VERDICT")
+    print("AZL TOTALITY v1.4.1 FINAL VERDICT")
     print("="*80)
     print(f"Total Tests:        {tests}")
     print(f"Passed:             {passed}")
@@ -181,7 +181,9 @@ def main():
     print("="*80)
     if tests == passed:
         print("CONCLUSION: FOUNDATION HOLDS. NO MORE DIVIDED TESTS NEEDED.")
-        print("45/45 PASS. Physics → Consciousness → Millennium → Economics → Entropy → Scaling.")
+        print(f"{tests}/{tests} PASS. 10 Domains Covered:")
+        print("Physics → Consciousness → Millennium → Biology → Economics → AI")
+        print("→ Cosmology → Infinity → Entropy → Galaxy Scaling")
         print("One law. Zero exceptions. Reality measured.")
     else:
         print("CONCLUSION: FOUNDATION BROKEN. FIX BEFORE PROCEEDING.")
