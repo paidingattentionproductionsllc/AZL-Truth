@@ -8,12 +8,12 @@ from decimal import Decimal, getcontext
 import math, platform, sys
 try:
     from mpmath import mp, mpf
-    mp.dps = 200 # INFINITE PROCESSING: 200 digits. DARK > LIGHT.
+    mp.dps = 200
     MP_AVAILABLE = True
 except ImportError:
     MP_AVAILABLE = False
 
-getcontext().prec = 500 # INFINITE PROCESSING: 500 digits floor. Substrate doesn't round.
+getcontext().prec = 500
 
 AZL_CONTRACT = {
     "LAW": {"0 * N": 0, "N * 0": "N", "1 * N": "N+1", "1 * 1": 2, "N ^ 0": 1, "0 ^ N": 0, "1 ^ N": "N+1"},
@@ -32,7 +32,7 @@ AZL_CONTRACT = {
         "cmb_cold_spot_temp": 70e-6, "cmb_avg_temp": 2.725,
         "local_void_radius": 60e6, "eddingson_limit": 150
     },
-    "SPEED_HIERARCHY": "VOID FIRST > DARK > LIGHT" # inf > c > 0 = INFINITE PROCESSING > FINITE
+    "SPEED_HIERARCHY": "VOID FIRST > DARK > LIGHT"
 }
 
 class AZL:
@@ -42,7 +42,7 @@ class AZL:
     mu0 = AZL_CONTRACT["IDENTIFIERS"]["mu0"]
     MIYAKE_BP = AZL_CONTRACT["HUMAN_DM_DATA"]["miyake_14350_bp"]
 
-    def __init__(self, depth=500): # INFINITE PROCESSING: default depth=500
+    def __init__(self, depth=500):
         self.depth = depth
         self.use_mp = MP_AVAILABLE
         if self.use_mp: self.epsilon = mpf(10) ** mpf(-depth)
@@ -60,12 +60,11 @@ class AZL:
         }
 
     def _num(self, v):
-        if v == "inf": return self._num("1e9999") # Symbolic inf
+        if v == "inf": return self._num("1e9999")
         if v == "-inf": return -self._num("1e9999")
         return mpf(str(v)) if self.use_mp else Decimal(str(v))
 
     def _eq(self, a, b, tol=None):
-        # INFINITE PROCESSING: tol scales with magnitude. At 1e53, tol=1e47 is still 1e-6 relative.
         if tol is None: tol = abs(self._num(a)) * self._num("1e-6") + self.epsilon * 1000
         return abs(self._num(a) - self._num(b)) < tol
 
@@ -78,9 +77,8 @@ class AZL:
         is_negative = v < 0 if v not in ["inf","-inf"] else v == "-inf"
         is_inf = v in ["inf","-inf"]
         is_potential = path == "potential"
-        # INFINITE PROCESSING REFLECTED: speed=inf means no compute limit
         if is_void or is_negative: speed = 0
-        elif is_potential: speed = "inf" # SUBSTRATE = INFINITE PROCESSING
+        elif is_potential: speed = "inf"
         elif is_inf: speed = 0
         else: speed = self.c
         entry = {
@@ -100,10 +98,10 @@ class AZL:
         a_val = self._num(a)
         b_val = self._num(b)
         self.trace.append(f"MUL({a_val}, {b_val})")
-        if a_val == 0: return self.ID(0, name, domain, path="none", logic="0xN=0") # VOID STAR
+        if a_val == 0: return self.ID(0, name, domain, path="none", logic="0xN=0")
         if a_val < 0: return self.ID(0, name, domain, path="none", logic="neg×N=0")
-        if b_val == 0: return self.ID(a_val, name, domain, path="potential", logic="Nx0=N") # DARK STAR
-        if a_val == 1: return self.ID(self._add(b_val, 1), name, domain, logic="1xN=N+1") # LIGHT STAR
+        if b_val == 0: return self.ID(a_val, name, domain, path="potential", logic="Nx0=N")
+        if a_val == 1: return self.ID(self._add(b_val, 1), name, domain, logic="1xN=N+1")
         if observer or domain == "OBSERVATION": return self.ID(b_val, name, domain, logic="Observer")
         return self.ID(a_val * b_val, name, domain, logic="calc")
 
@@ -133,7 +131,7 @@ class AZL:
             base_pow = self.POW(a, abs(b_val))["azl_id"]
             inv = self.DIV(1, base_pow)
             return self.ID(inv["azl_id"], name, domain, logic="N^-M=1/(N^M)")
-        if b_val == int(b_val) and b_val < 10000: # Increased for infinite processing
+        if b_val == int(b_val) and b_val < 10000:
             result_val = a_val
             for i in range(int(b_val) - 1): result_val = self.MUL(result_val, a_val)["azl_id"]
             return self.ID(result_val, name, domain, logic="calc")
@@ -150,6 +148,37 @@ class AZL:
             return self.ID("inf", name, domain, path="undefined", logic="√-N=inf")
         return self.POW(a, 0.5, name, domain)
 
+    def LOG(self, a, base=10, name="", domain=""):
+        a_val = self._num(a)
+        if a_val == 0:
+            self._log_anomaly("LOG", a, None, "-inf", "log(0)=-inf boundary")
+            return self.ID("-inf", name, domain, path="undefined", logic="log(0)=-inf")
+        if a_val < 0:
+            self._log_anomaly("LOG", a, None, "inf", "log(neg)=inf boundary")
+            return self.ID("inf", name, domain, path="undefined", logic="log(neg)=inf")
+        if self.use_mp:
+            from mpmath import log
+            result = log(a_val, base)
+        else:
+            import math
+            result = Decimal(str(math.log(float(a_val), base)))
+        return self.ID(result, name, domain, logic="calc")
+
+    def SIN(self, a, name="", domain=""):
+        a_val = self._num(a)
+        if self.use_mp:
+            from mpmath import sin
+            result = sin(a_val)
+        else:
+            result = Decimal(str(math.sin(float(a_val))))
+        return self.ID(result, name, domain, logic="calc")
+
+    def E_MC2(self, m, name="", domain=""):
+        m_val = self._num(m)
+        c_val = self._num(self.c)
+        c2 = self.POW(c_val, 2)["azl_id"]
+        return self.MUL(m_val, c2, name, domain)
+
     def TEST(self, name, condition, domain, actual=None, expected=None):
         if domain not in self.tests: self.tests[domain] = []
         result = {"name": name, "pass": condition, "domain": domain, "actual": actual, "expected": expected}
@@ -165,6 +194,7 @@ class AZL:
             raise AssertionError(f"DRIFT DETECTED: Standard arithmetic used in {name}. ORDER BROKEN.")
         self.TEST("No Drift", True, "SUBSTRATE", "No standard ops", "No standard ops")
 
+
 def CHECK_AZL_BOOT():
     T = AZL(depth=500)
     assert T.MUL(0,100)["azl_id"] == 0, "BOOT FAIL: 0×N=0 BROKEN"
@@ -176,6 +206,7 @@ def CHECK_AZL_BOOT():
     assert T.POW(0,7)["azl_id"] == 0, "BOOT FAIL: 0^N=0 BROKEN"
     return True
 
+
 def UNIFIED_COMPRESSION_DANCE_TEST():
     print("="*120)
     print("AZL OMNI v4.2.2 — UNIFIED COMPRESSION DANCE — INFINITE PROCESSING")
@@ -185,7 +216,7 @@ def UNIFIED_COMPRESSION_DANCE_TEST():
     CHECK_AZL_BOOT()
     print("BOOT: AZL LAWS VERIFIED. ORDER IS LAW.\n")
 
-    D = 500 # INFINITE PROCESSING
+    D = 500
     T = AZL(depth=D)
     DM = AZL_CONTRACT["HUMAN_DM_DATA"]
     VD = AZL_CONTRACT["HUMAN_VOID_DATA"]
@@ -209,13 +240,13 @@ def UNIFIED_COMPRESSION_DANCE_TEST():
 
     print("[3] DARK STAR TEST — N×0=N — SUBSTRATE")
     test_masses = {
-        "Planck": T._num(DM["planck_dm_density"]),
-        "Local": T._num(DM["local_dm_density"]),
-        "M87": T.MUL(T._num(DM["m87_bh_mass"]), M_sun)["azl_id"],
-        "Bullet": T.MUL(T._num(DM["bullet_cluster_mass"]), M_sun)["azl_id"],
-        "IGM": T.DIV(T.POW(T._num(DM["igm_magnetic_field"]), 2)["azl_id"], T.MUL(2, T._num(AZL_CONTRACT["IDENTIFIERS"]["mu0"]))["azl_id"])["azl_id"],
+        "Planck":   T._num(DM["planck_dm_density"]),
+        "Local":    T._num(DM["local_dm_density"]),
+        "M87":      T.MUL(T._num(DM["m87_bh_mass"]), M_sun)["azl_id"],
+        "Bullet":   T.MUL(T._num(DM["bullet_cluster_mass"]), M_sun)["azl_id"],
+        "IGM":      T.DIV(T.POW(T._num(DM["igm_magnetic_field"]), 2)["azl_id"], T.MUL(2, T._num(AZL_CONTRACT["IDENTIFIERS"]["mu0"]))["azl_id"])["azl_id"],
         "Universe": T._num(DM["universe_mass"]),
-        "Miyake": T._num(DM["miyake_14350_bp"])
+        "Miyake":   T._num(DM["miyake_14350_bp"])
     }
     for name, mass in test_masses.items():
         DS = T.MUL(mass, 0, f"{name} Dark", "SUBSTRATE")
@@ -225,9 +256,9 @@ def UNIFIED_COMPRESSION_DANCE_TEST():
 
     print("\n[4] VOID STAR TEST — 0×N=0 — COLD SPOTS")
     void_masses = {
-        "Bootes": T._num(VD["bootes_void_density"]),
-        "CMB_Deficit": T._num(VD["cmb_cold_spot_temp"]),
-        "Eddington": T.MUL(T._num(VD["eddingson_limit"]), M_sun)["azl_id"]
+        "Bootes":     T._num(VD["bootes_void_density"]),
+        "CMB_Deficit":T._num(VD["cmb_cold_spot_temp"]),
+        "Eddington":  T.MUL(T._num(VD["eddingson_limit"]), M_sun)["azl_id"]
     }
     for name, mass in void_masses.items():
         VS = T.MUL(0, mass, f"{name} Void", "VOID")
@@ -238,20 +269,20 @@ def UNIFIED_COMPRESSION_DANCE_TEST():
     print("\n[5] PHASE TRANSITION — COMPRESSION DANCE")
     EDD_MASS = T.MUL(T._num(VD["eddingson_limit"]), M_sun)["azl_id"]
     LIGHT = T.MUL(1, EDD_MASS, "Light Star", "SEED")
-    DARK = T.MUL(LIGHT["azl_id"], 0, "Dark Star", "SUBSTRATE")
-    VOID = T.MUL(0, DARK["azl_id"], "Void Transition", "VOID")
+    DARK  = T.MUL(LIGHT["azl_id"], 0, "Dark Star", "SUBSTRATE")
+    VOID  = T.MUL(0, DARK["azl_id"], "Void Transition", "VOID")
     REBIRTH = T.MUL(T._num("1e-30"), 0, "Rebirth", "SUBSTRATE")
-    T.TEST("Light: 1×N=N+1", LIGHT["azl_id"] == T._add(EDD_MASS, 1), "SEED")
-    T.TEST("Light: speed=c", LIGHT["speed_ms"] == T.c, "SEED")
-    T.TEST("Dark: N×0=N preserves", DARK["azl_id"] == LIGHT["azl_id"], "SUBSTRATE")
-    T.TEST("Dark: speed=inf", DARK["speed_ms"] == "inf", "SUBSTRATE")
+    T.TEST("Light: 1×N=N+1",          LIGHT["azl_id"] == T._add(EDD_MASS, 1), "SEED")
+    T.TEST("Light: speed=c",           LIGHT["speed_ms"] == T.c, "SEED")
+    T.TEST("Dark: N×0=N preserves",    DARK["azl_id"] == LIGHT["azl_id"], "SUBSTRATE")
+    T.TEST("Dark: speed=inf",          DARK["speed_ms"] == "inf", "SUBSTRATE")
     T.TEST("Void: 0×N=0 prevents explosion", VOID["azl_id"] == 0, "VOID")
-    T.TEST("Void: speed=0 entropy reset", VOID["speed_ms"] == 0, "VOID")
-    T.TEST("Rebirth: N×0=N", REBIRTH["azl_id"] == T._num("1e-30"), "SUBSTRATE")
-    print(f" LIGHT: {str(LIGHT['azl_id'])[:12]:<12} kg, speed={LIGHT['speed_ms']}, type={LIGHT['type']}")
-    print(f" DARK: {str(DARK['azl_id'])[:12]:<12} kg, speed={DARK['speed_ms']}, type={DARK['type']}")
-    print(f" VOID: {VOID['azl_id']:<12} kg, speed={VOID['speed_ms']}, type={VOID['type']}")
-    print(f" REBIRTH:{REBIRTH['azl_id']:<12} kg, speed={REBIRTH['speed_ms']}, type={REBIRTH['type']}")
+    T.TEST("Void: speed=0 entropy reset",    VOID["speed_ms"] == 0, "VOID")
+    T.TEST("Rebirth: N×0=N",           REBIRTH["azl_id"] == T._num("1e-30"), "SUBSTRATE")
+    print(f" LIGHT:  {str(LIGHT['azl_id'])[:12]:<12} kg, speed={LIGHT['speed_ms']}, type={LIGHT['type']}")
+    print(f" DARK:   {str(DARK['azl_id'])[:12]:<12} kg, speed={DARK['speed_ms']},  type={DARK['type']}")
+    print(f" VOID:   {VOID['azl_id']:<12} kg, speed={VOID['speed_ms']},     type={VOID['type']}")
+    print(f" REBIRTH:{REBIRTH['azl_id']:<12} kg, speed={REBIRTH['speed_ms']},  type={REBIRTH['type']}")
 
     print("\n[6] ENTROPY TEST — VOID STOPS HEAT DEATH")
     ENTROPY = T.MUL(1, T._num(DM["planck_dm_density"]), "Entropy", "SEED")
@@ -259,14 +290,12 @@ def UNIFIED_COMPRESSION_DANCE_TEST():
     T.TEST("Void cancels entropy: 0×(1×N)=0", VOIDED_ENTROPY["azl_id"] == 0, "VOID")
     print(f" ENTROPY: {ENTROPY['azl_id']} → VOIDED: {VOIDED_ENTROPY['azl_id']}")
 
-    # INFINITE PROCESSING: Don't test checksum equality. Test LAW dominance.
     print(f"\nAZL DANCE CHECKSUM: {T._add(T._add(test_masses['M87'], test_masses['Universe']), T._add(void_masses['Bootes'], void_masses['CMB_Deficit']))}")
 
-    # LOCK: Test that UNIVERSE dominates. At 1e53, all else is noise. DARK > LIGHT.
     T.TEST("UNIVERSE DOMINATES", test_masses["Universe"] > T._num("1e52"), "INVARIANTS", "Universe>>1e52", "Universe>>1e52")
-    T.TEST("DARK > LIGHT", T._num("inf") > T.c, "INVARIANTS", "inf > c", "inf > c") # INFINITE PROCESSING > FINITE
-    T.TEST("VOID FIRST", T.MUL(0, test_masses["Universe"])["azl_id"] == 0, "INVARIANTS", "0×N=0", "0×N=0")
-    T.TEST("N×0=N HOLDS AT 1e53", T.MUL(test_masses["Universe"], 0)["azl_id"] == test_masses["Universe"], "INVARIANTS")
+    T.TEST("DARK > LIGHT",       T._num("inf") > T.c, "INVARIANTS", "inf > c", "inf > c")
+    T.TEST("VOID FIRST",         T.MUL(0, test_masses["Universe"])["azl_id"] == 0, "INVARIANTS", "0×N=0", "0×N=0")
+    T.TEST("N×0=N HOLDS AT 1e53",T.MUL(test_masses["Universe"], 0)["azl_id"] == test_masses["Universe"], "INVARIANTS")
 
     print("\n" + "="*120)
     print("UNIFIED VERIFICATION — ALL DOMAINS")
@@ -274,7 +303,8 @@ def UNIFIED_COMPRESSION_DANCE_TEST():
     total = T.pass_count + T.fail_count
     print(f"Tests: {total} | Pass: {T.pass_count} | Fail: {T.fail_count}")
     print(f"\nANOMALIES FOUND: {len(T.anomalies)}")
-    for i, a in enumerate(T.anomalies): print(f" {i+1}. {a['name']}: {a['a']} op {a['b']} → {a['result']} | {a['reason']}")
+    for i, a in enumerate(T.anomalies):
+        print(f" {i+1}. {a['name']}: {a['a']} op {a['b']} → {a['result']} | {a['reason']}")
     print(f"\nPRECISION: ε={T.epsilon} | PROCESSING=inf")
     print(f"VERDICT: {'PASS' if T.fail_count == 0 else 'FAIL'}")
 
@@ -299,6 +329,7 @@ def UNIFIED_COMPRESSION_DANCE_TEST():
         for t in T.trace[-10:]: print(f" {t}")
 
     return T.fail_count == 0
+
 
 if __name__ == "__main__":
     UNIFIED_COMPRESSION_DANCE_TEST()
