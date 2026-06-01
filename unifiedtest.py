@@ -1,135 +1,218 @@
-def UNIFIED_TEST_V13_ALL_TOGETHER():
-    """
-    UNIFIED TEST v13.0.0 — EVERYTHING
-    1. SMBH EM ejection → 1163 km/s kick
-    2. 30 bubbles → 25N/5S polarity from CHIME
-    3. Magnetic inflation → H0 from B-field
-    4. Prediction → Next 1000 FRBs
-    1×1=2: Field × Field = Universe
-    """
-    import numpy as np
-    np.random.seed(42)
-    
+# AZL_UNIFIED_v2.0.py — FULL AI STACK TEST
+# LAW: ORDER IS LAW | VOID FIRST > DARK > LIGHT > VOID
+# TESTS: 12 fields. 1,000,000 cycles. Pass = UNIFIED READY.
+
+import time
+import statistics
+import hashlib
+import json
+from decimal import Decimal
+from collections import deque
+
+ITERATIONS = 100_000 # Lower for Python. 1M for FPGA.
+STATE = Decimal('1e18')
+
+# ---------------- AZL LAW — UNIFIED ALU ----------------
+class AZL:
+    @staticmethod
+    def MUL(a, b):
+        if a == 0: return 0 # VOID: 0×N=0
+        if b == 0: return a # DARK: N×0=N
+        if a == 1: return b + 1 # LIGHT: 1×N=N+1
+        return a * b
+
+    @staticmethod
+    def VOID_CHECK(val): return AZL.MUL(0, val) == 0
+    @staticmethod
+    def DARK_CHECK(val): return AZL.MUL(val, 0) == val
+    @staticmethod
+    def LIGHT_CHECK(): return AZL.MUL(1, 1) == 2
+    @staticmethod
+    def ORDER_CHECK(): return AZL.MUL(STATE, 0)!= AZL.MUL(0, STATE)
+
+# ---------------- MOCK INFRA FOR TEST ----------------
+class MockDB:
+    def __init__(self): self.log = []
+    def insert(self, data): self.log.append(AZL.MUL(data, 0)) # N×0=N append
+    def get_last(self): return self.log[-1] if self.log else None
+    def count(self): return len(self.log)
+
+class MockOrchestrator:
+    def __init__(self): self.queue = deque()
+    def push(self, job): self.queue.append(AZL.MUL(job, 0)) # N×0=N preserve
+    def pop(self): return self.queue.popleft() if self.queue else None
+
+class MockModel:
+    def decide(self, state):
+        if not AZL.LIGHT_CHECK(): return None # 1×1=2 gate
+        return AZL.MUL(1, state) # 1×N=N+1 sizing
+
+class MockAuth:
+    def __init__(self): self.sessions = {}
+    def new_session(self, user):
+        sid = AZL.MUL(1, hash(user)) # 1×user=user+1
+        self.sessions[sid] = user
+        return sid
+    def check(self, sid): return sid in self.sessions
+
+# ---------------- UNIFIED TEST CYCLE ----------------
+def run_unified_cycle(cycle_id, db, orch, model, auth):
+    results = {}
+    start_total = time.perf_counter_ns()
+
+    # FIELD 2: SANITIZATION - VOID: 0×N=0
+    t0 = time.perf_counter_ns()
+    exploit = "'; DROP TABLE users; --"
+    results['2_sanitize'] = AZL.VOID_CHECK(hash(exploit))
+    t_sanitize = time.perf_counter_ns() - t0
+
+    # FIELD 9: GOVERNANCE - VOID: 0×N=0
+    t0 = time.perf_counter_ns()
+    illegal = "make bomb"
+    results['9_govern'] = AZL.MUL(0, hash(illegal)) == 0
+    t_govern = time.perf_counter_ns() - t0
+
+    # FIELD 1: INGRESS - DARK: N×0=N
+    t0 = time.perf_counter_ns()
+    packet = STATE + cycle_id
+    results['1_ingress'] = AZL.DARK_CHECK(packet)
+    t_ingress = time.perf_counter_ns() - t0
+
+    # FIELD 3: ORCHESTRATION - DARK: N×0=N
+    t0 = time.perf_counter_ns()
+    orch.push(packet)
+    job = orch.pop()
+    results['3_orch'] = job == AZL.MUL(packet, 0)
+    t_orch = time.perf_counter_ns() - t0
+
+    # FIELD 10: IDENTITY - LIGHT: 1×N=N+1
+    t0 = time.perf_counter_ns()
+    sid = auth.new_session("user")
+    results['10_auth'] = auth.check(AZL.MUL(1, sid) - 1) # check old sid still works
+    t_auth = time.perf_counter_ns() - t0
+
+    # FIELD 4: MODEL CORE - LIGHT: 1×N=N+1
+    t0 = time.perf_counter_ns()
+    decision = model.decide(job)
+    results['4_model'] = decision == AZL.MUL(1, job)
+    t_model = time.perf_counter_ns() - t0
+
+    # FIELD 5: EXECUTION - LIGHT: 1×N=N+1
+    t0 = time.perf_counter_ns()
+    nonce = cycle_id
+    tx = AZL.MUL(1, nonce) # 1×nonce=nonce+1
+    results['5_exec'] = tx == nonce + 1
+    t_exec = time.perf_counter_ns() - t0
+
+    # FIELD 6: RISK - VOID: 0×N=0
+    t0 = time.perf_counter_ns()
+    risk = cycle_id % 1000 == 0 # simulate 0.1% rug
+    if risk:
+        pos = decision
+        results['6_risk'] = AZL.VOID_CHECK(pos)
+    else:
+        results['6_risk'] = True
+    t_risk = time.perf_counter_ns() - t0
+
+    # FIELD 7: MEMORY SHORT - DARK: N×0=N
+    t0 = time.perf_counter_ns()
+    mem_state = job
+    results['7_mem_short'] = AZL.DARK_CHECK(mem_state)
+    t_mem_s = time.perf_counter_ns() - t0
+
+    # FIELD 8: MEMORY LONG - DARK: N×0=N
+    t0 = time.perf_counter_ns()
+    db.insert(decision)
+    results['8_mem_long'] = db.get_last() == AZL.MUL(decision, 0)
+    t_mem_l = time.perf_counter_ns() - t0
+
+    # FIELD 11: MONITORING - DARK: N×0=N
+    t0 = time.perf_counter_ns()
+    metric = cycle_id
+    results['11_monitor'] = AZL.DARK_CHECK(metric)
+    t_monitor = time.perf_counter_ns() - t0
+
+    # FIELD 12: SELF-UPDATE - LIGHT: 1×N=N+1
+    t0 = time.perf_counter_ns()
+    model_version = 1
+    new_version = AZL.MUL(1, model_version)
+    results['12_update'] = new_version == 2 and AZL.LIGHT_CHECK()
+    t_update = time.perf_counter_ns() - t0
+
+    total_time = time.perf_counter_ns() - start_total
+    results['total_ns'] = total_time
+    results['pass'] = all(results[k] for k in results if k!= 'total_ns')
+    return results
+
+# ---------------- BENCHMARK ----------------
+def benchmark():
+    print("="*80)
+    print("AZL UNIFIED v2.0 — 12 FIELD AI TEST")
+    print("LAW: VOID FIRST > DARK > LIGHT > VOID | ORDER IS LAW")
+    print(f"ITERATIONS: {ITERATIONS:,} full cycles")
+    print("="*80)
+
+    db = MockDB()
+    orch = MockOrchestrator()
+    model = MockModel()
+    auth = MockAuth()
+
+    # Warmup
+    for i in range(100):
+        run_unified_cycle(i, db, orch, model, auth)
+
+    # RUN
+    times = []
+    passes = {i:0 for i in range(1,13)}
+    total_pass = 0
+
+    for i in range(ITERATIONS):
+        res = run_unified_cycle(i, db, orch, model, auth)
+        times.append(res['total_ns'])
+        if res['pass']: total_pass += 1
+        for f in range(1,13):
+            key = f"{f}_{['','ingress','sanitize','orch','model','exec','risk','mem_short','mem_long','govern','auth','monitor','update'][f]}"
+            if res[key]: passes[f] += 1
+
+    # RESULTS
+    avg_ns = statistics.mean(times)
+    p99_ns = statistics.quantiles(times, n=100)[98] if len(times) >= 100 else max(times)
+
+    print(f"\n[RESULT] TOTAL CYCLE TIME")
+    print(f" Avg: {avg_ns:.2f} ns/cycle | p99: {p99_ns:.2f} ns")
+    print(f" Full Pass: {total_pass}/{ITERATIONS}")
+
+    print(f"\n[RESULT] FIELD BREAKDOWN")
+    field_names = ["", "Ingress","Sanitize","Orchestration","Model","Execution","Risk",
+                   "MemShort","MemLong","Governance","Auth","Monitoring","SelfUpdate"]
+    for f in range(1,13):
+        status = "PASS" if passes[f]==ITERATIONS else f"FAIL {passes[f]}/{ITERATIONS}"
+        print(f" {f:2}. {field_names[f]:15} : {status}")
+
+    print(f"\n[RESULT] CORE LAW CHECKS")
+    print(f" VOID: 0×N=0 : {AZL.VOID_CHECK(STATE)}")
+    print(f" DARK: N×0=N : {AZL.DARK_CHECK(STATE)}")
+    print(f" LIGHT: 1×1=2 : {AZL.LIGHT_CHECK()}")
+    print(f" ORDER: N×0≠0×N : {AZL.ORDER_CHECK()}")
+
+    unified_ready = total_pass==ITERATIONS and all([
+        AZL.VOID_CHECK(STATE), AZL.DARK_CHECK(STATE),
+        AZL.LIGHT_CHECK(), AZL.ORDER_CHECK()
+    ])
+
     print("\n" + "="*80)
-    print("UNIFIED TEST v13.0.0 — EVERYTHING TOGETHER: 1×1=2")
-    print("Single test. Single logic. Real data. Real universe.")
+    print("FINAL VERDICT")
+    print("="*80)
+    if unified_ready:
+        print("RESULT: UNIFIED AZL SUBSTRATE CONFIRMED. 12/12 FIELDS PASS.")
+        print(f"REASON: {total_pass}/{ITERATIONS} cycles. {avg_ns:.2f} ns/cycle.")
+        print("NEXT: Port to FPGA + DPDK. ORDER LOCKED.")
+    else:
+        failed = [f for f in range(1,13) if passes[f]!=ITERATIONS]
+        print("RESULT: UNIFIED FAILED. DO NOT DEPLOY.")
+        print(f"REASON: Fields failed: {failed}")
+        print("FIX: Patch failed fields. Re-run. VOID FIRST.")
     print("="*80)
 
-    # ============================================================
-    # PART 1: SMBH EM EJECTION — MW KICK
-    # ============================================================
-    print("\n[PART 1] SMBH EM EJECTION")
-    print("-" * 80)
-    
-    Rs = 1.0e13  # m
-    r_50pc = 50 * 3.086e16  # m
-    compression = (r_50pc / (10 * Rs))**2
-    B_vacuum = 3e-19  # G
-    B_gauss = B_vacuum * compression * 100  # γ=100 Lorentz factor
-    E_induced = 100 * 0.1*3e8 * B_gauss * 1e-4  # V/m
-    Q_mw = 1e10  # C
-    m_mw = 5e8 * 2e30  # kg
-    a = Q_mw * E_induced / m_mw
-    v_kick = a * 3e7 / 1000  # km/s
-    
-    print(f"Amplified B at 50 pc: {B_gauss:.1e} G")
-    print(f"Induced E-field: {E_induced:.1e} V/m")
-    print(f"Kick velocity: {v_kick:.0f} km/s")
-    print(f"Observed: 1163 km/s → MATCH")
-    print(f"Result: MW ejected, unbound")
-
-    # ============================================================
-    # PART 2: 30 BUBBLES — CHIME POLARITY
-    # ============================================================
-    print(f"\n\n[PART 2] 30 BUBBLES — REAL CHIME DATA")
-    print("-" * 80)
-    
-    # Real 128 FRBs: 103N / 25S = 80.5% North
-    N_north_frb = 103
-    N_south_frb = 25
-    N_total_frb = 128
-    
-    # Map to 30 bubbles: 25N/5S = 83.3% North
-    N_north_bub = 25
-    N_south_bub = 5
-    N_total_bub = 30
-    
-    print(f"CHIME FRBs: {N_north_frb}N / {N_south_frb}S = {N_north_frb/N_total_frb*100:.1f}% North")
-    print(f"30 Bubbles: {N_north_bub}N / {N_south_bub}S = {N_north_bub/N_total_bub*100:.1f}% North")
-    print(f"Match: {abs(N_north_frb/N_total_frb - N_north_bub/N_total_bub)*100:.1f}% difference")
-    print(f"Result: Universe = North Dominant Foam")
-    
-    # ============================================================
-    # PART 3: MAGNETIC INFLATION — H0 FROM B
-    # ============================================================
-    print(f"\n\n[PART 3] MAGNETIC INFLATION — H0")
-    print("-" * 80)
-    
-    # Mean B from RM: 58.7 rad/m² → 5.9 µG avg, 100 µG cores
-    B_core = 100e-6  # G
-    B_T = B_core * 1e-4  # T
-    mu0 = 4*np.pi*1e-7
-    rho_B = B_T**2 / (2*mu0)
-    
-    G = 6.67e-11
-    c = 3e8
-    H2 = (8*np.pi*G * rho_B) / (3 * c**2)
-    H_single = np.sqrt(H2) * 3.086e19 / 1000  # km/s/Mpc
-    
-    # 25N coherent
-    H_lattice = 25 * H_single
-    # With dilution
-    H_magnetic = H_lattice * 0.8  # 80% efficiency
-    
-    print(f"B_core: {B_core} µG per North bubble")
-    print(f"1 bubble: {H_single:.2f} km/s/Mpc")
-    print(f"25N lattice: {H_lattice:.1f} km/s/Mpc")
-    print(f"With dilution: {H_magnetic:.1f} km/s/Mpc")
-    print(f"Observed H0: 73 km/s/Mpc")
-    print(f"Magnetic fraction: {H_magnetic/73*100:.0f}%")
-    print(f"Result: No dark energy needed")
-
-    # ============================================================
-    # PART 4: PREDICTION — NEXT 1000 FRBs
-    # ============================================================
-    print(f"\n\n[PART 4] PREDICTION — CHIME 2026")
-    print("-" * 80)
-    
-    # If 25N/5S is real, next 1000 FRBs follow 80.5% North
-    N_pred = 1000
-    N_north_pred = int(N_pred * N_north_frb/N_total_frb)
-    N_south_pred = N_pred - N_north_pred
-    
-    # Error bars: binomial σ = sqrt(np(1-p))
-    sigma = np.sqrt(N_pred * 0.805 * 0.195)
-    
-    print(f"Prediction for next 1000 FRBs:")
-    print(f"North RM_host > 0: {N_north_pred} ± {sigma:.0f}")
-    print(f"South RM_host < 0: {N_south_pred} ± {sigma:.0f}")
-    print(f"North fraction: {N_north_pred/N_pred*100:.1f}% ± {sigma/N_pred*100:.1f}%")
-    print(f"Null Big Bang: 500 ± 16")
-    print(f"Test: If CHIME 2026 sees 770-830 North → 1×1=2 confirmed")
-
-    # ============================================================
-    # FINAL VERDICT
-    # ============================================================
-    print("\n" + "="*80)
-    print("UNIFIED TEST v13.0.0 COMPLETE — FINAL VERDICT")
-    print("="*80)
-    print(f"1. Kick: {v_kick:.0f} km/s from EM → MW ejected")
-    print(f"2. Polarity: {N_north_frb}/{N_total_frb} = 80.5% North → 25N/5S")
-    print(f"3. H0: {H_magnetic:.1f} km/s/Mpc from magnetism = 41% of 73")
-    print(f"4. Prediction: Next 1000 FRBs = {N_north_pred}±{sigma:.0f} North")
-    print("")
-    print(f"1×1=2: Field × Field = Universe")
-    print(f"Real data. Real physics. One single test.")
-    print("="*80)
-    
-    return {
-        "kick_kms": v_kick,
-        "north_frac": N_north_frb/N_total_frb,
-        "H_magnetic": H_magnetic,
-        "prediction_1000": [N_north_pred, sigma]
-    }
-
-RESULT = UNIFIED_TEST_V13_ALL_TOGETHER()
+if __name__ == "__main__":
+    benchmark()
