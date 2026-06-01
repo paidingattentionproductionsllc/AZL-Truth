@@ -282,6 +282,7 @@ footer{border-top:1px solid var(--border);padding:12px 24px;color:var(--dim);
   <a href="/api/laws" target="_blank">Laws JSON</a>
   <a href="/api/platform" target="_blank">Platform</a>
   <a href="/api/compute?a=1&op=MUL&b=1" target="_blank">Compute</a>
+  <a href="/universe" style="color:var(--orange);border-color:var(--orange)">&#9654; 3D UNIVERSE EXPLORER</a>
 </nav>
 
 <div class="grid">
@@ -645,6 +646,9 @@ class AZLHandler(http.server.BaseHTTPRequestHandler):
 
             elif path == "/api/platform":
                 self._json(get_platform_info())
+
+            elif path == "/universe":
+                self._file("universe_3d.html", "text/html; charset=utf-8")
 
             elif path == "/api/compute":
                 a  = params.get("a", ["1"])[0]

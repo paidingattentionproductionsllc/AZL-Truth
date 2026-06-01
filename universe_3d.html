@@ -1,0 +1,599 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no">
+<title>AZL Universe Explorer</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#000;overflow:hidden;font-family:'Courier New',monospace;color:#cce;user-select:none;touch-action:none}
+canvas{display:block;cursor:crosshair}
+
+/* ── INTRO ── */
+#intro{position:fixed;inset:0;background:rgba(0,0,12,.97);display:flex;
+  flex-direction:column;align-items:center;justify-content:center;z-index:100;padding:20px;text-align:center}
+#intro h1{font-size:clamp(16px,3.5vw,34px);color:#00ffff;letter-spacing:4px;margin-bottom:6px}
+.sub{color:#7799bb;font-size:clamp(10px,1.6vw,12px);margin-bottom:22px;line-height:1.9}
+.keys{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:8px;max-width:560px;margin-bottom:24px}
+.k{background:#07071a;border:1px solid #1a1a3a;padding:8px 12px;border-radius:3px;font-size:11px;color:#99aacc;text-align:left}
+.k span{color:#00ffff}
+#enter{background:transparent;border:2px solid #00ffff;color:#00ffff;padding:12px 44px;
+  font-family:'Courier New',monospace;font-size:14px;letter-spacing:3px;cursor:pointer;border-radius:3px;transition:all .2s}
+#enter:hover{background:#00ffff;color:#000}
+.warn{color:#888;font-size:10px;margin-top:12px}
+
+/* ── HUD ── */
+#hud{position:fixed;inset:0;pointer-events:none;z-index:10}
+#ch{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);pointer-events:none}
+#ch::before,#ch::after{content:'';position:absolute;background:rgba(0,255,255,.55)}
+#ch::before{width:1px;height:14px;left:7px;top:1px}
+#ch::after{width:14px;height:1px;left:1px;top:7px}
+
+.hud-tl{position:absolute;top:14px;left:14px;font-size:11px;line-height:2}
+.hud-tr{position:absolute;top:14px;right:14px;font-size:11px;line-height:2;text-align:right}
+.hud-bl{position:absolute;bottom:52px;left:14px;font-size:11px;line-height:2}
+.hud-br{position:absolute;bottom:52px;right:14px;font-size:10px;line-height:1.9;text-align:right;opacity:.45}
+.hl{color:#445566;font-size:9px;letter-spacing:2px}
+.hv{color:#cce}
+.hc{color:#00ffff}.hg{color:#ffd700}.hp{color:#aa66ff}.ho{color:#ff6b35}.hgreen{color:#44ff88}
+
+/* speed bar */
+#sbar{position:absolute;bottom:18px;left:50%;transform:translateX(-50%);
+  display:flex;align-items:center;gap:8px;font-size:10px;color:#445566}
+#str{width:140px;height:3px;background:#111128;border-radius:2px}
+#sfill{height:3px;background:#00ffff;border-radius:2px;transition:width .1s}
+#sval{color:#00ffff;font-size:11px;min-width:80px}
+
+/* info panel */
+#info{position:fixed;top:50%;right:16px;transform:translateY(-50%);
+  background:rgba(2,2,20,.93);border:1px solid #1a1a3a;padding:14px;border-radius:4px;
+  width:230px;font-size:11px;line-height:1.9;display:none;z-index:20;pointer-events:none}
+#info h3{color:#00ffff;font-size:12px;letter-spacing:2px;margin-bottom:8px;
+  border-bottom:1px solid #1a1a3a;padding-bottom:5px}
+.ir{display:flex;justify-content:space-between;gap:4px}
+.ik{color:#445566}.iv{color:#cce}
+
+/* legend */
+#leg{position:fixed;bottom:58px;right:14px;font-size:10px;line-height:2;opacity:.55;pointer-events:none}
+
+/* zone flash */
+#zone-flash{position:absolute;top:52%;left:50%;transform:translateX(-50%);
+  font-size:11px;letter-spacing:2px;text-align:center;pointer-events:none;
+  text-shadow:0 0 10px #000;transition:opacity .5s}
+</style>
+</head>
+<body>
+<canvas id="c"></canvas>
+
+<div id="hud">
+  <div id="ch"></div>
+  <div class="hud-tl">
+    <div class="hl">POSITION (Mpc)</div>
+    <div class="hv">X<span id="px"> 0.0</span> Y<span id="py"> 0.0</span> Z<span id="pz"> 0.0</span></div>
+    <div class="hl" style="margin-top:4px">DISTANCE FROM MW</div>
+    <div class="hc" id="dist">0.000 Mpc</div>
+    <div class="hl" style="margin-top:4px">LOOKBACK TIME</div>
+    <div class="hg" id="lbt">0.000 Gyr</div>
+  </div>
+  <div class="hud-tr">
+    <div class="hl">SPEED</div>
+    <div class="hc" id="spd">1.0 Mpc/s</div>
+    <div class="hl" style="margin-top:4px">AZL TYPE</div>
+    <div id="azltype">—</div>
+    <div class="hl" style="margin-top:4px">NEAREST OBJECT</div>
+    <div class="hv" id="nearest">Milky Way</div>
+    <div class="hl" style="margin-top:4px">COSMIC ZONE</div>
+    <div id="zone">LOCAL GROUP</div>
+  </div>
+  <div class="hud-bl">
+    <div class="hl">OBJECTS VISIBLE</div>
+    <div class="hgreen" id="vis">—</div>
+    <div class="hl" style="margin-top:4px">AZL OMNI v6.0</div>
+    <div class="hgreen">67/67 PASS · ε=1e-500</div>
+  </div>
+  <div class="hud-br">
+    WASD / DRAG — move &amp; look<br>
+    SCROLL — speed<br>
+    CLICK — select object<br>
+    ESC — menu
+  </div>
+  <div id="sbar">
+    <span>SLOW</span>
+    <div id="str"><div id="sfill" style="width:40%"></div></div>
+    <span>FAST</span>
+    <span id="sval">1.0 Mpc/s</span>
+  </div>
+  <div id="zone-flash" style="opacity:0"></div>
+</div>
+
+<div id="leg">
+  <div><span class="hc">◆ DARK</span> N×0=N ∞</div>
+  <div><span class="hg">● LIGHT</span> 1×N=N+1 c</div>
+  <div><span class="hp">✕ VOID</span> 0×N=0  0</div>
+  <div><span class="ho">⬡ BUBBLE</span> AZL</div>
+  <div style="color:#4488ff">· FRB N</div>
+  <div style="color:#ff4444">· FRB S</div>
+  <div style="color:#223344">· UNCHARTED</div>
+</div>
+
+<div id="info">
+  <h3 id="iname">—</h3>
+  <div class="ir"><span class="ik">TYPE</span><span class="iv" id="itype">—</span></div>
+  <div class="ir"><span class="ik">DISTANCE</span><span class="iv" id="idist">—</span></div>
+  <div class="ir"><span class="ik">LOOKBACK</span><span class="iv" id="ilb">—</span></div>
+  <div class="ir"><span class="ik">AZL LAW</span><span class="iv" id="ilaw">—</span></div>
+  <div class="ir"><span class="ik">SPEED</span><span class="iv" id="ispd">—</span></div>
+  <div id="inote" style="margin-top:8px;color:#445566;font-size:10px;line-height:1.7"></div>
+</div>
+
+<div id="intro">
+  <h1>AZL UNIVERSE EXPLORER</h1>
+  <div class="sub">
+    Observable Universe · 13,700 Mpc radius · 178+ mapped objects<br>
+    Procedural uncharted deep space · AZL OMNI v6.0<br>
+    <span style="color:#ff6b35">First-person · Navigate freely through the cosmos</span>
+  </div>
+  <div class="keys">
+    <div class="k"><span>W A S D</span> — Move through space</div>
+    <div class="k"><span>MOUSE DRAG</span> — Look direction</div>
+    <div class="k"><span>SPACE / SHIFT</span> — Up / Down</div>
+    <div class="k"><span>SCROLL WHEEL</span> — Change speed ×10</div>
+    <div class="k"><span>CLICK</span> — Select nearest object</div>
+    <div class="k"><span>ESC</span> — Release / menu</div>
+  </div>
+  <button id="enter">ENTER THE UNIVERSE</button>
+  <div class="warn">Pure Canvas 2D · Works on all devices · No WebGL required</div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════════════════════════════
+// DATA
+// ═══════════════════════════════════════════════════════════════════════════
+const CATALOG=[
+ {n:"Milky Way",         x:0,      y:0,      z:0,      lb:0,     lm:10.5,t:"DARK", law:"N×0=N",  spd:"∞",  note:"Origin. SgrA* 4.3M M☉. You are here."},
+ {n:"Andromeda M31",     x:.65,    y:.42,    z:.15,    lb:.003,  lm:11,  t:"LIGHT",law:"1×N=N+1",spd:"c",  note:"Nearest spiral galaxy. Merger in ~4.5 Gyr."},
+ {n:"LMC",               x:.03,    y:-.03,   z:-.01,   lb:0,     lm:9,   t:"LIGHT",law:"1×N=N+1",spd:"c",  note:"Large Magellanic Cloud. Satellite of MW."},
+ {n:"Virgo Cluster",     x:10,     y:5.5,    z:3,      lb:.054,  lm:14.5,t:"DARK", law:"N×0=N",  spd:"∞",  note:"1300+ galaxies. M87 jet 5000 ly long."},
+ {n:"Centaurus",         x:-28,    y:-30,    z:12,     lb:.15,   lm:14.2,t:"DARK", law:"N×0=N",  spd:"∞",  note:"Strong X-ray source. 10^14 M☉."},
+ {n:"Perseus Cluster",   x:55,     y:32,     z:18,     lb:.24,   lm:14.8,t:"DARK", law:"N×0=N",  spd:"∞",  note:"Brightest X-ray cluster. Sound waves in hot gas."},
+ {n:"Coma Cluster",      x:65,     y:75,     z:25,     lb:.33,   lm:15,  t:"DARK", law:"N×0=N",  spd:"∞",  note:"Original dark matter evidence (Zwicky 1933)."},
+ {n:"Fornax Cluster",    x:-14,    y:-17,    z:-6,     lb:.065,  lm:13.8,t:"DARK", law:"N×0=N",  spd:"∞",  note:"Second nearest cluster to MW."},
+ {n:"Laniakea",          x:40,     y:20,     z:15,     lb:.25,   lm:16,  t:"DARK", law:"N×0=N",  spd:"∞",  note:"Our home supercluster. 500 Mpc diameter."},
+ {n:"Sloan Great Wall",  x:150,    y:220,    z:80,     lb:.98,   lm:17,  t:"LIGHT",law:"1×N=N+1",spd:"c",  note:"1.37 billion ly long. Largest known 2003."},
+ {n:"CfA2 Great Wall",   x:90,     y:110,    z:40,     lb:.65,   lm:16.5,t:"LIGHT",law:"1×N=N+1",spd:"c",  note:"Harvard-CfA survey 1989. 500 Mly long."},
+ {n:"HCB Great Wall",    x:200,    y:2800,   z:900,    lb:10,    lm:18,  t:"LIGHT",law:"1×N=N+1",spd:"c",  note:"Hercules-Corona Borealis. 10 Bly. Largest known."},
+ {n:"Boötes Void",       x:60,     y:200,    z:100,    lb:.98,   lm:0,   t:"VOID", law:"0×N=0",  spd:"0",  note:"250 Mly across. 60 galaxies where 2000 expected."},
+ {n:"Local Void",        x:-5,     y:-40,    z:-20,    lb:.25,   lm:0,   t:"VOID", law:"0×N=0",  spd:"0",  note:"Repels Milky Way at 259 km/s."},
+ {n:"Eridanus Void",     x:-50,    y:-80,    z:-30,    lb:.4,    lm:0,   t:"VOID", law:"0×N=0",  spd:"0",  note:"300 Mly across. Connected to local supervoid."},
+ {n:"CMB Cold Spot",     x:-300,   y:2700,   z:900,    lb:11,    lm:0,   t:"VOID", law:"0×N=0",  spd:"0",  note:"70µK colder than CMB. Supervoid candidate."},
+ {n:"CMB Surface",       x:500,    y:13600,  z:200,    lb:13.78, lm:50,  t:"LIGHT",law:"1×N=N+1",spd:"c",  note:"Last scattering surface. 380,000 yrs after BB."},
+ {n:"Reionization",      x:300,    y:9000,   z:100,    lb:13,    lm:45,  t:"LIGHT",law:"1×N=N+1",spd:"c",  note:"First stars reionize hydrogen. 400M–1B yrs post-BB."},
+ {n:"Observable Horizon",x:0,      y:13700,  z:0,      lb:13.8,  lm:0,   t:"VOID", law:"0×N=0",  spd:"0",  note:"Edge of observable universe. Beyond: uncharted."},
+ {n:"Miyake 14350 BP",   x:-3,     y:-2,     z:0,      lb:.014,  lm:10,  t:"DARK", law:"N×0=N",  spd:"∞",  note:"Solar proton event 14,350 BP. 14350×0=14350. Past preserved."},
+];
+
+// Seeded RNG
+function rng32(s){return function(){s|=0;s=s+0x6D2B79F5|0;let t=Math.imul(s^s>>>15,1|s);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
+const R=rng32(42);
+
+// FRBs
+const FRBS=[];
+for(let i=0;i<128;i++){
+  const ra=R()*360,dec=-11+R()*101,dL=500+R()*4500,north=i<103;
+  const cr=Math.cos(dec*Math.PI/180);
+  FRBS.push({x:dL*cr*Math.cos(ra*Math.PI/180),y:dL*cr*Math.sin(ra*Math.PI/180),z:dL*Math.sin(dec*Math.PI/180),north});
+}
+
+// Bubbles
+const BUBBS=[];
+for(let i=0;i<30;i++){
+  const r=50+R()*350,ra=R()*360,dec=i<25?(10+R()*70):(-60+R()*50);
+  const cr=Math.cos(dec*Math.PI/180);
+  BUBBS.push({x:r*cr*Math.cos(ra*Math.PI/180),y:r*cr*Math.sin(ra*Math.PI/180),z:r*Math.sin(dec*Math.PI/180)});
+}
+
+// Procedural background galaxies (4000)
+const PROCS=[];
+for(let i=0;i<4000;i++){
+  const r=800+R()*12500,th=R()*Math.PI*2,ph=Math.acos(2*R()-1);
+  PROCS.push({x:r*Math.sin(ph)*Math.cos(th),y:r*Math.sin(ph)*Math.sin(th),z:r*Math.cos(ph),b:.08+R()*.3});
+}
+
+// Background stars (fixed in sky — very large distance)
+const STARS=[];
+for(let i=0;i<3000;i++){
+  const r=20000+R()*5000,th=R()*Math.PI*2,ph=Math.acos(2*R()-1);
+  const t=R();
+  const c=t<.2?{r:.6,g:.7,b:1}:t<.7?{r:.9,g:.9,b:.9}:{r:1,g:.9,b:.6};
+  STARS.push({x:r*Math.sin(ph)*Math.cos(th),y:r*Math.sin(ph)*Math.sin(th),z:r*Math.cos(ph),...c,s:.3+R()*.7});
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// CANVAS SETUP
+// ═══════════════════════════════════════════════════════════════════════════
+const cv=document.getElementById('c');
+const ctx=cv.getContext('2d');
+function resize(){cv.width=window.innerWidth;cv.height=window.innerHeight}
+resize();
+window.addEventListener('resize',resize);
+
+// ═══════════════════════════════════════════════════════════════════════════
+// CAMERA STATE
+// ═══════════════════════════════════════════════════════════════════════════
+const cam={x:0,y:0,z:0,yaw:0,pitch:0};
+// Note: in this explorer, camera Y is "up" in world space
+// Catalog coords map directly: world (x,y,z) = catalog (x,y,z)
+
+// ═══════════════════════════════════════════════════════════════════════════
+// 3D PROJECTION MATH
+// ═══════════════════════════════════════════════════════════════════════════
+// Transform world point to camera space, then project to screen
+function project(wx,wy,wz){
+  // Translate
+  let dx=wx-cam.x, dy=wy-cam.y, dz=wz-cam.z;
+  // Rotate by yaw (around world Z-up = our Y)
+  const sy=Math.sin(-cam.yaw), cy2=Math.cos(-cam.yaw);
+  let rx=dx*cy2+dz*sy;
+  let rz=-dx*sy+dz*cy2;
+  let ry=dy;
+  // Rotate by pitch (around local X)
+  const sp=Math.sin(-cam.pitch), cp=Math.cos(-cam.pitch);
+  let fy=ry*cp-rz*sp;
+  let fz=ry*sp+rz*cp;
+  const fx=rx;
+  // fz is depth (positive = in front)
+  if(fz<=0.001)return null;
+  const fov=75, W=cv.width, H=cv.height;
+  const f=(W/2)/Math.tan(fov*Math.PI/360);
+  return{sx:W/2+fx/fz*f, sy:H/2-fy/fz*f, depth:fz, inFront:true};
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// CONTROLS
+// ═══════════════════════════════════════════════════════════════════════════
+const keys={};
+let active=false, dragging=false, lastMX=0, lastMY=0;
+const SPEEDS=[.0005,.002,.01,.05,.1,.5,1,5,10,50,100,500,1000,5000,10000];
+let si=8; // default index → 1 Mpc/s
+
+const intro=document.getElementById('intro');
+document.getElementById('enter').addEventListener('click',()=>{intro.style.display='none';active=true;cv.focus()});
+document.addEventListener('keydown',e=>{
+  keys[e.code]=true;
+  if(e.code==='Escape'){intro.style.display='flex';active=false}
+  e.preventDefault&&(e.code!=='F5'&&e.code!=='F11')&&e.preventDefault();
+});
+document.addEventListener('keyup',e=>{keys[e.code]=false});
+
+// Mouse drag look
+cv.addEventListener('mousedown',e=>{if(!active)return;dragging=true;lastMX=e.clientX;lastMY=e.clientY});
+window.addEventListener('mouseup',()=>dragging=false);
+window.addEventListener('mousemove',e=>{
+  if(!dragging||!active)return;
+  const sens=.003;
+  cam.yaw  +=(e.clientX-lastMX)*sens;
+  cam.pitch+=(e.clientY-lastMY)*sens;
+  cam.pitch=Math.max(-Math.PI/2+.01,Math.min(Math.PI/2-.01,cam.pitch));
+  lastMX=e.clientX;lastMY=e.clientY;
+});
+
+// Scroll speed
+window.addEventListener('wheel',e=>{
+  si=e.deltaY>0?Math.max(0,si-1):Math.min(SPEEDS.length-1,si+1);
+  e.preventDefault();
+},{passive:false});
+
+// Touch
+let tc=null, tLast=null, pinchLast=0;
+cv.addEventListener('touchstart',e=>{
+  if(e.touches.length===1){tc={x:e.touches[0].clientX,y:e.touches[0].clientY};tLast={...tc}}
+  if(e.touches.length===2) pinchLast=Math.hypot(e.touches[0].clientX-e.touches[1].clientX,e.touches[0].clientY-e.touches[1].clientY);
+},{passive:true});
+cv.addEventListener('touchmove',e=>{
+  if(e.touches.length===1&&tLast&&active){
+    const dx=e.touches[0].clientX-tLast.x, dy=e.touches[0].clientY-tLast.y;
+    cam.yaw+=dx*.003; cam.pitch=Math.max(-Math.PI/2+.01,Math.min(Math.PI/2-.01,cam.pitch+dy*.003));
+    tLast={x:e.touches[0].clientX,y:e.touches[0].clientY};
+  }
+  if(e.touches.length===2){
+    const d=Math.hypot(e.touches[0].clientX-e.touches[1].clientX,e.touches[0].clientY-e.touches[1].clientY);
+    if(pinchLast){if(d>pinchLast+4)si=Math.min(SPEEDS.length-1,si+1);else if(d<pinchLast-4)si=Math.max(0,si-1);}
+    pinchLast=d;
+  }
+},{passive:true});
+cv.addEventListener('touchend',()=>{tc=null;tLast=null;pinchLast=0});
+
+// Click to select nearest visible object
+let selObj=null,selTimer=0;
+cv.addEventListener('click',e=>{
+  if(!active)return;
+  // find catalog object closest to screen center
+  let best=null,bestD=9e9;
+  for(const o of CATALOG){
+    const p=project(o.x,o.y,o.z);
+    if(!p)continue;
+    const scr=Math.hypot(p.sx-cv.width/2,p.sy-cv.height/2);
+    if(scr<100&&p.depth<bestD){bestD=p.depth;best=o;}
+  }
+  if(best){showInfo(best,bestD);selObj=best;selTimer=8000;}
+  else{document.getElementById('info').style.display='none';selObj=null;}
+});
+
+function showInfo(o,d){
+  document.getElementById('iname').textContent=o.n;
+  const c=o.t==="DARK"?"#00ffff":o.t==="VOID"?"#aa66ff":"#ffd700";
+  document.getElementById('itype').style.color=c;
+  document.getElementById('itype').textContent=o.t;
+  document.getElementById('idist').textContent=d.toFixed(2)+' Mpc';
+  document.getElementById('ilb').textContent=o.lb.toFixed(3)+' Gyr';
+  document.getElementById('ilaw').textContent=o.law;
+  document.getElementById('ispd').textContent='speed = '+o.spd;
+  document.getElementById('inote').textContent=o.note;
+  document.getElementById('info').style.display='block';
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// ZONE / AZL TYPE
+// ═══════════════════════════════════════════════════════════════════════════
+function getZone(d){
+  if(d<2)   return{n:"LOCAL GROUP",c:"#00ffff"};
+  if(d<50)  return{n:"LOCAL SUPERCLUSTER",c:"#44aaff"};
+  if(d<200) return{n:"LANIAKEA SUPERCLUSTER",c:"#4499ff"};
+  if(d<500) return{n:"NEARBY UNIVERSE",c:"#ffd700"};
+  if(d<2000)return{n:"DEEP FIELD",c:"#ffaa44"};
+  if(d<5000)return{n:"UNCHARTED TERRITORY",c:"#ff6b35"};
+  if(d<10000)return{n:"HUBBLE FRONTIER — UNCHARTED",c:"#ff4444"};
+  if(d<13400)return{n:"REIONIZATION EPOCH",c:"#ff3388"};
+  return      {n:"CMB HORIZON — EDGE OF UNIVERSE",c:"#aa33ff"};
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// DRAW HELPERS
+// ═══════════════════════════════════════════════════════════════════════════
+function glow(p,r,color,alpha){
+  const g=ctx.createRadialGradient(p.sx,p.sy,0,p.sx,p.sy,r*3);
+  g.addColorStop(0,color+(Math.round(alpha*255).toString(16).padStart(2,'0')));
+  g.addColorStop(1,color+'00');
+  ctx.fillStyle=g;
+  ctx.beginPath();ctx.arc(p.sx,p.sy,r*3,0,Math.PI*2);ctx.fill();
+}
+
+function dot(p,r,color){
+  ctx.fillStyle=color;
+  ctx.beginPath();ctx.arc(p.sx,p.sy,r,0,Math.PI*2);ctx.fill();
+}
+
+function label(p,text,color,offsetY){
+  ctx.fillStyle=color;
+  ctx.font='11px "Courier New"';
+  ctx.textAlign='center';
+  ctx.fillText(text,p.sx,p.sy+(offsetY||0));
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// MAIN RENDER
+// ═══════════════════════════════════════════════════════════════════════════
+let last=performance.now(), frame=0;
+let prevZone='';
+let animRunning=false;
+
+function tick(now){
+  const dt=Math.min((now-last)/1000,.08);
+  last=now;
+  if(selTimer>0){selTimer-=dt*1000;if(selTimer<=0)document.getElementById('info').style.display='none';}
+
+  // ── MOVEMENT ─────────────────────────────────────────────────────────────
+  if(active){
+    const spd=SPEEDS[si];
+    // Forward vector from yaw+pitch
+    const fy_=Math.sin(cam.yaw)*Math.cos(cam.pitch);
+    const fz_=Math.cos(cam.yaw)*Math.cos(cam.pitch);
+    const fyUp=Math.sin(cam.pitch);
+    // Right vector (perpendicular to forward in horizontal plane)
+    const rx_=Math.cos(cam.yaw), rz_=-Math.sin(cam.yaw);
+
+    if(keys['KeyW']||keys['ArrowUp'])   {cam.x+=fy_*spd*dt;cam.y+=fyUp*spd*dt;cam.z+=fz_*spd*dt}
+    if(keys['KeyS']||keys['ArrowDown']) {cam.x-=fy_*spd*dt;cam.y-=fyUp*spd*dt;cam.z-=fz_*spd*dt}
+    if(keys['KeyA']||keys['ArrowLeft']) {cam.x-=rx_*spd*dt;cam.z-=rz_*spd*dt}
+    if(keys['KeyD']||keys['ArrowRight']){cam.x+=rx_*spd*dt;cam.z+=rz_*spd*dt}
+    if(keys['Space'])                   {cam.y+=spd*dt}
+    if(keys['ShiftLeft']||keys['ShiftRight']){cam.y-=spd*dt}
+
+    // Clamp to observable universe
+    const d0=Math.hypot(cam.x,cam.y,cam.z);
+    if(d0>13699){const sc=13699/d0;cam.x*=sc;cam.y*=sc;cam.z*=sc;}
+  }
+
+  // ── CLEAR ─────────────────────────────────────────────────────────────────
+  ctx.fillStyle='#000008';
+  ctx.fillRect(0,0,cv.width,cv.height);
+
+  // ── BACKGROUND STARS (no depth sort — they're effectively at infinity) ──
+  ctx.globalAlpha=1;
+  STARS.forEach(s=>{
+    const p=project(s.x,s.y,s.z);
+    if(!p)return;
+    const sz=s.s*(cv.width>1200?1.5:1);
+    ctx.fillStyle=`rgb(${Math.round(s.r*255)},${Math.round(s.g*255)},${Math.round(s.b*255)})`;
+    ctx.fillRect(p.sx-.5,p.sy-.5,sz,sz);
+  });
+
+  // ── BUILD RENDER LIST (depth sorted) ──────────────────────────────────────
+  const renderList=[];
+
+  // Procedural uncharted galaxies
+  PROCS.forEach(p=>{
+    const proj=project(p.x,p.y,p.z);
+    if(proj&&proj.depth>0){
+      const b=p.b;
+      renderList.push({depth:proj.depth,draw(){
+        ctx.globalAlpha=b*.7;
+        ctx.fillStyle=`rgb(${Math.round(b*60)},${Math.round(b*80)},${Math.round(b*180)})`;
+        ctx.beginPath();ctx.arc(proj.sx,proj.sy,.7,0,Math.PI*2);ctx.fill();
+      }});
+    }
+  });
+
+  // FRBs
+  FRBS.forEach(f=>{
+    const p=project(f.x,f.y,f.z);
+    if(p){
+      const col=f.north?'#3377ff':'#ff3333';
+      renderList.push({depth:p.depth,draw(){
+        ctx.globalAlpha=.65;
+        ctx.fillStyle=col;
+        ctx.beginPath();ctx.arc(p.sx,p.sy,1.2,0,Math.PI*2);ctx.fill();
+      }});
+    }
+  });
+
+  // Bubbles
+  BUBBS.forEach(b=>{
+    const p=project(b.x,b.y,b.z);
+    if(p){
+      renderList.push({depth:p.depth,draw(){
+        ctx.globalAlpha=.75;
+        ctx.fillStyle='#ff6b35';
+        ctx.beginPath();ctx.arc(p.sx,p.sy,2,0,Math.PI*2);ctx.fill();
+      }});
+    }
+  });
+
+  // ── CATALOG OBJECTS (compute positions, store for nearest/labels) ─────────
+  const catProj=[];
+  CATALOG.forEach(o=>{
+    const p=project(o.x,o.y,o.z);
+    catProj.push(p);
+    if(!p)return;
+    const worldDist=Math.hypot(o.x-cam.x,o.y-cam.y,o.z-cam.z);
+    const baseR=Math.max(1.5,Math.min(8,Math.log10(Math.max(1,o.lm))*3));
+    const screenR=Math.max(baseR,baseR*(200/Math.max(50,p.depth)));
+    const col=o.t==="DARK"?"#00ffff":o.t==="VOID"?"#9922cc":"#ffd700";
+    const glowCol=o.t==="DARK"?"#00ffff":o.t==="VOID"?"#6600aa":"#cc9900";
+    const showLabel=worldDist<Math.max(30,SPEEDS[si]*20)||worldDist<15;
+
+    renderList.push({depth:p.depth,draw(){
+      ctx.globalAlpha=1;
+      // Glow
+      const gr=ctx.createRadialGradient(p.sx,p.sy,0,p.sx,p.sy,screenR*4);
+      gr.addColorStop(0,glowCol+'88');
+      gr.addColorStop(1,glowCol+'00');
+      ctx.fillStyle=gr;
+      ctx.beginPath();ctx.arc(p.sx,p.sy,screenR*4,0,Math.PI*2);ctx.fill();
+      // Core
+      ctx.globalAlpha=.95;
+      ctx.fillStyle=col;
+      if(o.t==="VOID"){
+        // X shape
+        ctx.save();ctx.translate(p.sx,p.sy);ctx.rotate(Math.PI/4);
+        ctx.fillRect(-screenR*.4,-screenR*1.2,screenR*.8,screenR*2.4);
+        ctx.fillRect(-screenR*1.2,-screenR*.4,screenR*2.4,screenR*.8);
+        ctx.restore();
+      } else {
+        ctx.beginPath();ctx.arc(p.sx,p.sy,Math.max(1.5,screenR*.7),0,Math.PI*2);ctx.fill();
+      }
+      // Label
+      if(showLabel){
+        ctx.globalAlpha=Math.min(1,30/Math.max(1,worldDist*.5+1));
+        ctx.font='bold 11px "Courier New"';
+        ctx.textAlign='center';
+        ctx.fillStyle='rgba(0,0,0,.6)';
+        ctx.fillText(o.n,p.sx+1,p.sy-screenR-5);
+        ctx.fillStyle=col;
+        ctx.fillText(o.n,p.sx,p.sy-screenR-6);
+      }
+    }});
+  });
+
+  // ── SORT BACK TO FRONT ────────────────────────────────────────────────────
+  renderList.sort((a,b)=>b.depth-a.depth);
+  renderList.forEach(o=>{ctx.globalAlpha=1;o.draw()});
+  ctx.globalAlpha=1;
+
+  // ── UNIVERSE BOUNDARY CIRCLE (visible when close to edge) ─────────────────
+  const camDist=Math.hypot(cam.x,cam.y,cam.z);
+  if(camDist>10000){
+    // Draw concentric rings suggesting the boundary
+    const bp=project(0,13700,0);
+    if(bp){
+      ctx.strokeStyle='rgba(100,0,180,.2)';
+      ctx.lineWidth=1;
+      ctx.beginPath();ctx.arc(bp.sx,bp.sy,20,0,Math.PI*2);ctx.stroke();
+    }
+  }
+
+  // ── HUD UPDATE (every 4 frames) ───────────────────────────────────────────
+  if(frame%4===0){
+    document.getElementById('px').textContent=' '+cam.x.toFixed(1);
+    document.getElementById('py').textContent=' '+cam.y.toFixed(1);
+    document.getElementById('pz').textContent=' '+cam.z.toFixed(1);
+    document.getElementById('dist').textContent=camDist.toFixed(2)+' Mpc';
+    const lbt=Math.min(13.8,camDist/4400*13.8);
+    document.getElementById('lbt').textContent=lbt.toFixed(3)+' Gyr';
+
+    // Speed display
+    const spd=SPEEDS[si];
+    const spdStr=spd>=1000?spd.toFixed(0)+'k':spd>=1?spd.toFixed(spd>=10?0:1):spd.toFixed(4);
+    document.getElementById('spd').textContent=spdStr+' Mpc/s';
+    document.getElementById('sval').textContent=spdStr+' Mpc/s';
+    document.getElementById('sfill').style.width=Math.round(si/(SPEEDS.length-1)*100)+'%';
+
+    // AZL type
+    let azlT="DARK",azlC="#00ffff",azlL="N×0=N — Dark substrate";
+    if(camDist>13000){azlT="VOID";azlC="#aa66ff";azlL="0×N=0 — Beyond horizon";}
+    else if(camDist>5000){azlT="LIGHT";azlC="#ffd700";azlL="1×N=N+1 — Light horizon";}
+    const atEl=document.getElementById('azltype');
+    atEl.style.color=azlC;atEl.textContent=azlT+' — '+azlL;
+
+    // Zone
+    const z=getZone(camDist);
+    const zEl=document.getElementById('zone');
+    zEl.style.color=z.c;zEl.textContent=z.n;
+    if(z.n!==prevZone){
+      const fl=document.getElementById('zone-flash');
+      fl.style.color=z.c;fl.textContent='► '+z.n;fl.style.opacity='1';
+      setTimeout(()=>fl.style.opacity='0',2500);
+      prevZone=z.n;
+    }
+
+    // Nearest named object
+    let nearD=Infinity,nearN='—';
+    CATALOG.forEach(o=>{
+      const d=Math.hypot(o.x-cam.x,o.y-cam.y,o.z-cam.z);
+      if(d<nearD){nearD=d;nearN=o.n;}
+    });
+    document.getElementById('nearest').textContent=nearN+' ('+nearD.toFixed(2)+' Mpc)';
+
+    // Visible count
+    let vc=catProj.filter(p=>p&&p.inFront).length;
+    document.getElementById('vis').textContent=vc+' catalog + FRBs + galaxies';
+  }
+
+  frame++;
+}
+
+// ── ORIENTATION COMPASS (bottom center) ──────────────────────────────────
+function drawCompass(){
+  const cx2=cv.width/2, cy2=cv.height-36, r=20;
+  ctx.globalAlpha=.35;
+  ctx.strokeStyle='#334455';ctx.lineWidth=1;
+  ctx.beginPath();ctx.arc(cx2,cy2,r,0,Math.PI*2);ctx.stroke();
+  // North indicator
+  const nx=cx2+Math.sin(cam.yaw)*r;
+  const ny=cy2-Math.cos(cam.yaw)*r;
+  ctx.strokeStyle='#00ffff';ctx.lineWidth=1.5;
+  ctx.beginPath();ctx.moveTo(cx2,cy2);ctx.lineTo(nx,ny);ctx.stroke();
+  ctx.fillStyle='#00ffff';ctx.font='9px Courier New';ctx.textAlign='center';
+  ctx.fillText('N',nx+(nx-cx2)*.25,ny+(ny-cy2)*.25+3);
+  ctx.globalAlpha=1;
+}
+
+function mainTick(now){
+  requestAnimationFrame(mainTick);
+  tick(now);
+  if(active) drawCompass();
+}
+requestAnimationFrame(mainTick);
+</script>
+</body>
+</html>
