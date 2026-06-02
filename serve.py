@@ -667,6 +667,9 @@ class AZLHandler(http.server.BaseHTTPRequestHandler):
                 fname = "icon-192.png" if "192" in path or "apple" in path else "icon-512.png"
                 self._file(fname, "image/png")
 
+            elif path in ("/favicon.ico", "/favicon.png"):
+                self._file("icon-192.png", "image/png")
+
             elif path == "/api/compute":
                 a  = params.get("a", ["1"])[0]
                 b  = params.get("b", ["0"])[0]
