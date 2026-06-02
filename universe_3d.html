@@ -2,8 +2,16 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
 <title>AZL Universe Explorer</title>
+<meta name="description" content="Navigate the observable universe with AZL OMNI physics. 13,700 Mpc radius, 178+ mapped objects. First-person simulation.">
+<meta name="theme-color" content="#000008">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="AZL Universe">
+<link rel="manifest" href="/manifest.json">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 body{background:#000;overflow:hidden;font-family:'Courier New',monospace;color:#cce;user-select:none;touch-action:none}
@@ -60,6 +68,44 @@ canvas{display:block;cursor:crosshair}
 #zone-flash{position:absolute;top:52%;left:50%;transform:translateX(-50%);
   font-size:11px;letter-spacing:2px;text-align:center;pointer-events:none;
   text-shadow:0 0 10px #000;transition:opacity .5s}
+
+/* ── VIRTUAL D-PAD (touch devices) ── */
+#dpad,#vctrl{position:fixed;bottom:80px;z-index:20;display:none}
+#dpad{left:16px;width:132px;height:132px}
+#vctrl{right:16px;display:none;flex-direction:column;gap:8px;align-items:center}
+.db{position:absolute;width:44px;height:44px;background:rgba(0,255,255,.08);
+  border:1px solid rgba(0,255,255,.28);color:#00ffff;font-size:20px;
+  border-radius:6px;display:flex;align-items:center;justify-content:center;
+  cursor:pointer;touch-action:none;-webkit-tap-highlight-color:transparent;
+  transition:background .08s}
+.db:active,.db.pressed{background:rgba(0,255,255,.28)}
+#db-w{top:0;left:44px}
+#db-s{top:88px;left:44px}
+#db-a{top:44px;left:0}
+#db-d{top:44px;left:88px}
+.vb{width:50px;height:46px;background:rgba(0,255,255,.08);
+  border:1px solid rgba(0,255,255,.28);color:#00ffff;font-size:18px;
+  border-radius:6px;display:flex;align-items:center;justify-content:center;
+  cursor:pointer;touch-action:none;-webkit-tap-highlight-color:transparent;
+  transition:background .08s}
+.vb:active,.vb.pressed{background:rgba(0,255,255,.28)}
+/* speed +/- buttons */
+#spdbtn{position:fixed;bottom:80px;right:78px;display:none;
+  flex-direction:column;gap:8px;z-index:20}
+.spb{width:36px;height:36px;background:rgba(0,60,80,.4);border:1px solid rgba(0,255,255,.2);
+  color:#00ffff;font-size:14px;border-radius:4px;display:flex;align-items:center;
+  justify-content:center;cursor:pointer;touch-action:none;-webkit-tap-highlight-color:transparent}
+.spb:active{background:rgba(0,255,255,.25)}
+/* hide legend on small screens */
+@media(max-width:480px){#leg{display:none}.hud-bl{bottom:180px}}
+@media(max-height:500px){#leg{display:none}}
+/* install banner */
+#install-btn{position:fixed;top:12px;left:50%;transform:translateX(-50%);
+  background:rgba(0,255,255,.12);border:1px solid rgba(0,255,255,.4);
+  color:#00ffff;padding:6px 20px;border-radius:20px;font-family:'Courier New',monospace;
+  font-size:11px;letter-spacing:1px;cursor:pointer;z-index:200;display:none;
+  white-space:nowrap}
+#install-btn:hover{background:rgba(0,255,255,.25)}
 </style>
 </head>
 <body>
@@ -124,6 +170,25 @@ canvas{display:block;cursor:crosshair}
   <div class="ir"><span class="ik">AZL LAW</span><span class="iv" id="ilaw">—</span></div>
   <div class="ir"><span class="ik">SPEED</span><span class="iv" id="ispd">—</span></div>
   <div id="inote" style="margin-top:8px;color:#445566;font-size:10px;line-height:1.7"></div>
+</div>
+
+<!-- PWA install prompt -->
+<button id="install-btn">⬇ Install App</button>
+
+<!-- Virtual D-pad (shown on touch devices) -->
+<div id="dpad">
+  <div class="db" id="db-w">↑</div>
+  <div class="db" id="db-a">←</div>
+  <div class="db" id="db-s">↓</div>
+  <div class="db" id="db-d">→</div>
+</div>
+<div id="vctrl">
+  <div class="vb" id="db-sp">▲</div>
+  <div class="vb" id="db-sh">▼</div>
+</div>
+<div id="spdbtn">
+  <div class="spb" id="spd-up">+</div>
+  <div class="spb" id="spd-dn">−</div>
 </div>
 
 <div id="intro">
@@ -594,6 +659,89 @@ function mainTick(now){
   if(active) drawCompass();
 }
 requestAnimationFrame(mainTick);
+
+// ═══════════════════════════════════════════════════════════════════════════
+// TOUCH D-PAD — show on touch devices, bind to keys{}
+// ═══════════════════════════════════════════════════════════════════════════
+(function(){
+  const hasTouch='ontouchstart' in window||navigator.maxTouchPoints>0;
+  if(!hasTouch)return;
+
+  // Show the D-pad panels
+  document.getElementById('dpad').style.display='block';
+  const vc=document.getElementById('vctrl');
+  vc.style.display='flex';
+  const sb=document.getElementById('spdbtn');
+  sb.style.display='flex';
+
+  // Map button id → keyboard code
+  const map={
+    'db-w':'KeyW','db-s':'KeyS','db-a':'KeyA','db-d':'KeyD',
+    'db-sp':'Space','db-sh':'ShiftLeft'
+  };
+
+  // For each D-pad button, bind touchstart/touchend to toggle keys[]
+  Object.entries(map).forEach(([id,code])=>{
+    const el=document.getElementById(id);
+    if(!el)return;
+    el.addEventListener('touchstart',e=>{
+      e.stopPropagation();e.preventDefault();
+      keys[code]=true;el.classList.add('pressed');
+    },{passive:false});
+    ['touchend','touchcancel'].forEach(evt=>
+      el.addEventListener(evt,e=>{
+        e.stopPropagation();
+        keys[code]=false;el.classList.remove('pressed');
+      },{passive:true})
+    );
+  });
+
+  // Speed +/- buttons
+  const su=document.getElementById('spd-up'),sd=document.getElementById('spd-dn');
+  if(su){su.addEventListener('touchstart',e=>{e.stopPropagation();e.preventDefault();si=Math.min(SPEEDS.length-1,si+1);},{passive:false});}
+  if(sd){sd.addEventListener('touchstart',e=>{e.stopPropagation();e.preventDefault();si=Math.max(0,si-1);},{passive:false});}
+
+  // Update intro card to show touch instructions
+  const kGrid=document.querySelector('.keys');
+  if(kGrid){
+    kGrid.innerHTML=`
+      <div class="k"><span>D-PAD (bottom left)</span> — Fly through space</div>
+      <div class="k"><span>▲▼ (bottom right)</span> — Up / Down</div>
+      <div class="k"><span>+/− (middle right)</span> — Change speed</div>
+      <div class="k"><span>ONE FINGER DRAG</span> — Look direction</div>
+      <div class="k"><span>TWO FINGER PINCH</span> — Speed control</div>
+      <div class="k"><span>TAP</span> — Select nearest object</div>
+    `;
+  }
+})();
+
+// ═══════════════════════════════════════════════════════════════════════════
+// PWA — Service Worker + Install Prompt
+// ═══════════════════════════════════════════════════════════════════════════
+if('serviceWorker' in navigator){
+  navigator.serviceWorker.register('/sw.js',{scope:'/'}).then(reg=>{
+    console.log('[SW] registered',reg.scope);
+  }).catch(e=>console.warn('[SW] failed',e));
+}
+
+let deferredInstall=null;
+window.addEventListener('beforeinstallprompt',e=>{
+  e.preventDefault();
+  deferredInstall=e;
+  const btn=document.getElementById('install-btn');
+  btn.style.display='block';
+  btn.addEventListener('click',async()=>{
+    btn.style.display='none';
+    deferredInstall.prompt();
+    const {outcome}=await deferredInstall.userChoice;
+    console.log('[PWA] install outcome:',outcome);
+    deferredInstall=null;
+  },{once:true});
+});
+window.addEventListener('appinstalled',()=>{
+  document.getElementById('install-btn').style.display='none';
+  console.log('[PWA] installed!');
+});
 </script>
 </body>
 </html>

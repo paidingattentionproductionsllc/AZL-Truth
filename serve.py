@@ -16,11 +16,17 @@ import urllib.parse, traceback
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
 # ── ensure universe map exists ────────────────────────────────────────────────
+import subprocess
 if not os.path.exists("universe_map.png"):
     print("Generating universe_map.png …")
-    import subprocess
     subprocess.run([sys.executable, "universe_map.py"], check=True)
     print("universe_map.png ready.")
+
+# ── ensure PWA icons exist ─────────────────────────────────────────────────────
+if not os.path.exists("icon-192.png") or not os.path.exists("icon-512.png"):
+    print("Generating PWA icons …")
+    subprocess.run([sys.executable, "make_icon.py"], check=False)
+    print("Icons ready.")
 
 # ── import AZL engine ─────────────────────────────────────────────────────────
 sys.path.insert(0, ".")
@@ -649,6 +655,17 @@ class AZLHandler(http.server.BaseHTTPRequestHandler):
 
             elif path == "/universe":
                 self._file("universe_3d.html", "text/html; charset=utf-8")
+
+            elif path == "/manifest.json":
+                self._file("manifest.json", "application/manifest+json")
+
+            elif path == "/sw.js":
+                self._file("sw.js", "application/javascript")
+
+            elif path in ("/icon-192.png", "/icon-512.png",
+                          "/apple-touch-icon.png", "/apple-touch-icon"):
+                fname = "icon-192.png" if "192" in path or "apple" in path else "icon-512.png"
+                self._file(fname, "image/png")
 
             elif path == "/api/compute":
                 a  = params.get("a", ["1"])[0]
