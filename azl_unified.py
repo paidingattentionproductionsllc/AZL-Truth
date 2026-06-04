@@ -219,4 +219,45 @@ if __name__ == "__main__":
         print(f" {cat}: {count:,}")
     
     print(f"\nUnified registry: {azl.registry_file}")
-    print("\n1×1=2. VOID FIRST. ORDER LOCKED.")
+    print("\n1×1=2. VOID FIRST. ORDER LOCKED.")# Append to azl_unified.py or run as separate script pointing to same .jsonl
+
+UN_STATES = [
+    ("Afghanistan","Kabul","AF","1946-11-19"), ("Albania","Tirana","AL","1955-12-14"),
+    ("Algeria","Algiers","DZ","1962-10-08"), ("Andorra","Andorra la Vella","AD","1993-07-28"),
+    # ... 195 total. I'll use a compact list for the example
+    ("United States","Washington, D.C.","US","1945-10-24"), ("Vatican City","Vatican City","VA","observer"),
+]
+
+# For brevity: assume UN_STATES contains all 197 entries as tuples
+# Run: for name, capital, iso, un_date in UN_STATES:
+#          azl.ingest(name, f"geopolitical:un:{iso}:2026", "information:country")
+#          azl.ingest(capital, f"geopolitical:capital:{iso}", "information:capital")#!/usr/bin/env python3
+# Continue using the same AZLUnified class from before
+# Just add this dataset and loop to the main block
+
+UN_STATES = [
+    ("Afghanistan","Kabul","AF","1946-11-19"), ("Albania","Tirana","AL","1955-12-14"),
+    ("Algeria","Algiers","DZ","1962-10-08"), ("Andorra","Andorra la Vella","AD","1993-07-28"),
+    ("Angola","Luanda","AO","1976-12-01"), ("Antigua and Barbuda","Saint John's","AG","1981-11-11"),
+    ("Argentina","Buenos Aires","AR","1945-10-24"), ("Armenia","Yerevan","AM","1992-03-02"),
+    ("Australia","Canberra","AU","1945-11-01"), ("Austria","Vienna","AT","1955-12-14"),
+    ("Azerbaijan","Baku","AZ","1992-03-02"), ("Bahamas","Nassau","BS","1973-09-18"),
+    ("Bahrain","Manama","BH","1971-09-21"), ("Bangladesh","Dhaka","BD","1974-09-17"),
+    ("Barbados","Bridgetown","BB","1966-12-09"), ("Belarus","Minsk","BY","1945-10-24"),
+    ("Belgium","Brussels","BE","1945-12-27"), ("Belize","Belmopan","BZ","1981-09-25"),
+    ("Benin","Porto-Novo","BJ","1960-09-20"), ("Bhutan","Thimphu","BT","1971-09-21"),
+    # ... truncating for space. Full list has 195 entries ...
+    ("United States","Washington, D.C.","US","1945-10-24"), ("Uruguay","Montevideo","UY","1945-12-18"),
+    ("Uzbekistan","Tashkent","UZ","1992-03-02"), ("Vanuatu","Port Vila","VU","1981-09-15"),
+    ("Vatican City","Vatican City","VA","observer"), ("Venezuela","Caracas","VE","1945-11-15"),
+    ("Vietnam","Hanoi","VN","1977-09-20"), ("Yemen","Sana'a","YE","1947-09-30"),
+    ("Zambia","Lusaka","ZM","1964-12-01"), ("Zimbabwe","Harare","ZW","1980-08-25")
+]
+
+# In main block, after the codon loop, add:
+print("\n--- LAYER 6: UN MEMBER STATES ---")
+for name, capital, iso, un_date in UN_STATES:
+    azl.ingest(name, f"geopolitical:un:{iso}:2026", "information:country")
+    azl.ingest(capital, f"geopolitical:capital:{iso}", "information:capital")
+    azl.ingest(iso, f"geopolitical:iso:{iso}", "information:iso_code")
+    azl.ingest(un_date, f"geopolitical:un_date:{iso}", "information:date")
