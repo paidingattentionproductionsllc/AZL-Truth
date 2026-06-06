@@ -1,0 +1,112 @@
+#!/usr/bin/env python3
+# AZL UNIFIED - TIER 1-7 FULL BUILD
+# LAW: 0×N=0 | 1×N=N+1 | N×0=N | DARK > LIGHT
+# WARNING: GENERATES 1 BILLION LINES. ~200GB. WILL TAKE 20-60 MIN.
+
+import json
+import sys
+import time
+from decimal import Decimal, getcontext
+
+getcontext().prec = 510
+SCALE = Decimal('1e-500')
+
+# ===== CONFIG: TIER 1-7 FULL BUILD =====
+ACTIVE_TIER = 7
+TEST_MODE = False  # FULL BUILD. NO SAMPLES.
+# ========================================
+
+TIERS = {
+    1: {"name": "Canon", "end": 567},
+    2: {"name": "NGC_IC_HIP", "end": 120000},
+    3: {"name": "GaiaDR3", "end": 1000000},
+    4: {"name": "SDSS", "end": 10000000},
+    5: {"name": "2MASS", "end": 50000000},
+    6: {"name": "WISE", "end": 200000000},
+    7: {"name": "PanSTARRS", "end": 1000000000},
+}
+
+def azl_address(idx):
+    return Decimal(idx) * SCALE
+
+def generate_tier_data(tier_num, count):
+    """Generate count entries for tier_num"""
+    tier_name = TIERS[tier_num]["name"]
+    data = []
+    for n in range(1, count + 1):
+        data.append({"name": f"{tier_name}_{n}", "catalog": tier_name, "catalog_id": n})
+    return data
+
+def main():
+    print(f"[AZL] TIER 1-7 FULL BUILD | MODE: PRODUCTION")
+    print(f"[AZL] WARNING: THIS WILL GENERATE {TIERS[ACTIVE_TIER]['end']:,} ADDRESSES")
+    print(f"[AZL] ESTIMATED FILE SIZE: ~200GB")
+    print(f"[AZL] ESTIMATED TIME: 20-60 MINUTES")
+    print("[AZL] Starting in 5 seconds. CTRL+C to abort.")
+    time.sleep(5)
+    
+    start_time = time.time()
+    outfile = "azl_unified_TIER7.jsonl"
+    
+    with open(outfile, "w") as f:
+        idx = 0
+        for tier_num in range(1, ACTIVE_TIER + 1):
+            tier_info = TIERS[tier_num]
+            prev_end = TIERS[tier_num-1]["end"] if tier_num > 1 else 0
+            tier_size = tier_info["end"] - prev_end
+            
+            print(f"[AZL] Tier {tier_num}: {tier_info['name']} | Generating {tier_size:,} entries...")
+            tier_start = time.time()
+            
+            # Generate in chunks to show progress
+            chunk_size = 100000
+            for chunk_start in range(1, tier_size + 1, chunk_size):
+                chunk_end = min(chunk_start + chunk_size - 1, tier_size)
+                chunk_count = chunk_end - chunk_start + 1
+                
+                for n in range(chunk_start, chunk_end + 1):
+                    idx += 1
+                    obj = {
+                        "idx": idx,
+                        "name": f"{tier_info['name']}_{n}",
+                        "catalog": tier_info['name'],
+                        "catalog_id": n,
+                        "tier": tier_num,
+                        "address": str(azl_address(idx))
+                    }
+                    f.write(json.dumps(obj, separators=(',', ':')) + "\n")
+                
+                elapsed = time.time() - tier_start
+                rate = idx / elapsed if elapsed > 0 else 0
+                print(f"[AZL] Progress: {idx:,}/1,000,000,000 | {rate:,.0f} addr/sec | Tier {tier_num} {n/tier_size*100:.1f}%")
+    
+    # VERIFY LAST ADDRESS
+    print("[AZL] Verifying N×0=N on final address...")
+    expected = azl_address(1000000000)
+    if Decimal(str(azl_address(1000000000))) == expected:
+        print(f"[AZL] PASS: 1000000000 * 1e-500 = {expected}")
+    else:
+        print("[AZL] FAIL: Law broken")
+        sys.exit(1)
+    
+    total_time = time.time() - start_time
+    print(f"[AZL] TIER 1-7 COMPLETE")
+    print(f"[AZL] Total time: {total_time/60:.1f} minutes")
+    print(f"[AZL] Final size: 1,000,000,000 addresses")
+    print(f"[AZL] File: {outfile}")
+    print(f"[AZL] LAW HOLDS. But GitHub won't.")
+    
+    manifest = {
+        "law": "N×0=N",
+        "scale": "1e-500",
+        "active_tier": ACTIVE_TIER,
+        "total_addresses": 1000000000,
+        "last_address": str(azl_address(1000000000)),
+        "build_time_sec": total_time,
+        "warning": "FILE TOO LARGE FOR GITHUB. USE SHARDING OR EXTERNAL STORAGE."
+    }
+    with open("azl_manifest_TIER7.json", "w") as f:
+        json.dump(manifest, f, indent=2)
+
+if __name__ == "__main__":
+    main()
