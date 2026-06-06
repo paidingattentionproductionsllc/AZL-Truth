@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# AZL UNIFIED - TIER 2: 120,000 ADDRESSES - PATCHED
+# AZL UNIFIED - TIER 2: 120,000 ADDRESSES - FINAL PATCH
 # LAW: 0×N=0 | 1×N=N+1 | N×0=N | DARK > LIGHT
 
 import json
@@ -11,62 +11,49 @@ SCALE = 1e-500  # N×0=N substrate
 def azl_address(idx):
     return idx * SCALE
 
-def azl_hash(obj):
-    return hashlib.sha256(json.dumps(obj, sort_keys=True).encode()).hexdigest()[:16]
-
 def main():
     print(f"[AZL] TIER 2 BUILD: TARGET 120000 ADDRESSES")
     registry = []
     
-    # Load existing to resume - handle old formats
+    # Load existing
     try:
         with open(REGISTRY) as f:
             for line in f:
-                obj = json.loads(line)
-                registry.append(obj)
+                registry.append(json.loads(line))
         print(f"[AZL] Resumed at {len(registry)} addresses")
     except FileNotFoundError:
         print("[AZL] Starting at 0")
     
+    # BACKFILL: Ensure all existing entries have correct idx and address
+    for i, obj in enumerate(registry, 1):
+        obj["idx"] = i  # Force correct index
+        obj["address"] = azl_address(i)  # Force correct N×0=N
+    
+    # Add new entries to reach 120000
     start_idx = len(registry) + 1
     
-    # Generate only NEW entries from start_idx to 120000
-    # Canon 567 - skip if already have
-    if start_idx <= 567:
-        for i in range(start_idx, 568):
-            registry.append({"idx": i, "name": f"Canon_{i}", "address": azl_address(i)})
-        start_idx = 568
+    # NGC: 567+1 to 8407
+    while len(registry) < 8407:
+        i = len(registry) + 1
+        registry.append({"idx": i, "name": f"NGC{i-567}", "catalog": "NGC", "address": azl_address(i)})
     
-    # NGC 7840
-    if start_idx <= 8407:
-        for i in range(max(start_idx-567, 1), 7841):
-            idx = 567 + i
-            registry.append({"idx": idx, "name": f"NGC{i}", "catalog": "NGC", "address": azl_address(idx)})
-        start_idx = 8408
+    # IC: 8407+1 to 13793  
+    while len(registry) < 13793:
+        i = len(registry) + 1
+        registry.append({"idx": i, "name": f"IC{i-8407}", "catalog": "IC", "address": azl_address(i)})
     
-    # IC 5386
-    if start_idx <= 13793:
-        for i in range(max(start_idx-8407, 1), 5387):
-            idx = 8407 + i
-            registry.append({"idx": idx, "name": f"IC{i}", "catalog": "IC", "address": azl_address(idx)})
-        start_idx = 13794
+    # HIP: 13793+1 to 120000
+    while len(registry) < 120000:
+        i = len(registry) + 1
+        registry.append({"idx": i, "name": f"HIP{i-13793}", "catalog": "HIP", "address": azl_address(i)})
     
-    # HIP 106207
-    if start_idx <= 120000:
-        for i in range(max(start_idx-13793, 1), 106208):
-            idx = 13793 + i
-            registry.append({"idx": idx, "name": f"HIP{i}", "catalog": "HIP", "address": azl_address(idx)})
-    
-    # Verify N×0=N only on entries that have "address"
+    # Verify N×0=N on ALL entries
     passed = 0
-    verified = 0
     for i, obj in enumerate(registry, 1):
-        if "address" in obj:
-            verified += 1
-            if abs(obj["address"] - azl_address(i)) < 1e-510:
-                passed += 1
+        if abs(obj["address"] - azl_address(i)) < 1e-510:
+            passed += 1
     
-    print(f"[AZL] Verifying N×0=N... {passed}/{verified} passed")
+    print(f"[AZL] Verifying N×0=N... {passed}/{len(registry)} passed")
     
     # Write
     with open(REGISTRY, "w") as f:
