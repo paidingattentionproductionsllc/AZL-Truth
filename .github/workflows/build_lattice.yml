@@ -1,9 +1,9 @@
-name: Build AZL Lattice
+name: Build AZL Lattice Tier 2
 on:
-  workflow_dispatch: # Manual run button
+  workflow_dispatch: # Manual "Run workflow" button
   push:
     paths:
-      - 'azl_unified.py' # Auto-runs when you update the script
+      - 'azl_unified.py' # Auto-runs when you update script
       
 jobs:
   build:
@@ -15,10 +15,12 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.11'
-      - run: python3 azl_unified.py
-      - run: |
+      - name: Build 120k Lattice
+        run: python3 azl_unified.py
+      - name: Commit Registry
+        run: |
           git config user.name "AZL Bot"
-          git config user.email "azl@substrate"
+          git config user.email "azl@substrate.local"
           git add azl_unified.jsonl
-          git commit -m "Tier 2: Auto-build 120k addresses. N×0=N verified" || echo "No changes"
+          git commit -m "Tier 2: Auto-build 120k addresses. N×0=N verified" || echo "No changes to commit"
           git push
