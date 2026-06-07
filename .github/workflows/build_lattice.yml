@@ -1,12 +1,12 @@
 name: Build AZL Lattice TIER 1-7
 
 on:
-  workflow_dispatch:  # Lets you click "Run workflow" manually
+  workflow_dispatch:
 
 jobs:
   build:
     runs-on: ubuntu-latest
-    timeout-minutes: 360  # 6 hours max. 1B takes ~45min
+    timeout-minutes: 360
     
     steps:
       - name: Checkout repo
@@ -19,13 +19,13 @@ jobs:
         with:
           python-version: '3.11'
           
-      - name: Build AZL TIER 1-7
+      - name: Build AZL TIER 1-7 Zipped
         run: python azl_unified.py
         
-      - name: Commit shards + manifest
+      - name: Commit zipped batches + manifest
         run: |
           git config --global user.name 'azl-bot'
           git config --global user.email 'azl@n0n.io'
-          git add shards/ azl_manifest.json
-          git commit -m "AZL TIER 1-7: 1,000,000,000 addresses [N×0=N]" || echo "No changes"
+          git add shards/azl_batch_*.zip azl_manifest.json
+          git commit -m "AZL TIER 1-7: 1B addresses in 40 batches [N×0=N]" || echo "No changes"
           git push
