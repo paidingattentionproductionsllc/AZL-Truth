@@ -1,0 +1,31 @@
+name: Map AZL Electrons
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          
+      - name: Generate Electron Mappings
+        run: python -u azl_electrons.py
+        
+      - name: Commit Electron Mapper
+        run: |
+          git config --global user.name 'azl-bot'
+          git config --global user.email 'azl@n0n.io'
+          git add electrons/
+          git commit -m "AZL Electrons: Map 10^80 electrons → [0,1] substrate [N×0=N]" || echo "No changes"
+          git push
