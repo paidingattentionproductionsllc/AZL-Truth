@@ -3,6 +3,9 @@ name: Map AZL Electrons
 on:
   workflow_dispatch:
 
+permissions:
+  contents: write # <-- THIS LINE FIXES THE 403
+
 jobs:
   build:
     runs-on: ubuntu-latest
