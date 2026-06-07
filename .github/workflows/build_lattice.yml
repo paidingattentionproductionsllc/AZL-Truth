@@ -20,7 +20,7 @@ jobs:
           python-version: '3.11'
           
       - name: Build AZL [0,1] Lattice
-        run: python azl_unified.py
+  run: python -u azl_unified.py
         
       - name: Commit Zipped Batches + Manifest
         run: |
