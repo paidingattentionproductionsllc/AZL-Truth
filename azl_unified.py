@@ -6,13 +6,13 @@ import json
 import os
 import zipfile
 import time
+import sys
 
 # LAW CONSTANTS
 ACTIVE_TIER = 7
-SHARD_SIZE = 50000       # 50k addresses per .jsonl = 20,000 shards
-BATCH_SIZE = 500         # 500 shards per .zip = 40 zip files total
+SHARD_SIZE = 50000
+BATCH_SIZE = 500
 
-# TIER BOUNDARIES - PRECISION SLICES OF [0,1]
 TIERS = {
   1: {"name": "Canon", "end": 567},
   2: {"name": "NGC_IC_HIP", "end": 120000},
@@ -20,15 +20,15 @@ TIERS = {
   4: {"name": "SDSS", "end": 10000000},
   5: {"name": "2MASS", "end": 50000000},
   6: {"name": "WISE", "end": 200000000},
-  7: {"name": "PanSTARRS", "end": 1000000000},  # 1.000000000 = One's first integer
+  7: {"name": "PanSTARRS", "end": 1000000000},
 }
 
+def log(msg):
+    """Force flush logs for GitHub Actions"""
+    print(msg, flush=True)
+    sys.stdout.flush()
+
 def generate_azl_address(n):
-    """
-    N×0=N: Each integer n maps to coordinate n/10^9 in [0,1]
-    n=1 → 0.000000001 = first step from Absolute Zero
-    n=10^9 → 1.000000000 = first integer of One's range
-    """
     tier = 1
     for t, data in TIERS.items():
         if n <= data["end"]:
@@ -38,8 +38,8 @@ def generate_azl_address(n):
     return {
         "n": n,
         "tier": tier,
-        "value": n / 1_000_000_000,  # Real coordinate in [0,1]
-        "address": f"AZL-{n:010d}",   # AZL-0000000001 to AZL-1000000000
+        "value": n / 1_000_000_000,
+        "address": f"AZL-{n:010d}",
         "range": "zero" if n < 1_000_000_000 else "one",
         "law": "N×0=N",
         "proof": "1×1=2"
@@ -53,10 +53,10 @@ def main():
     total_shards = (total_addresses + SHARD_SIZE - 1) // SHARD_SIZE
     total_batches = (total_shards + BATCH_SIZE - 1) // BATCH_SIZE
     
-    print(f"[AZL] VOID FIRST. Absolute Zero → One")
-    print(f"[AZL] Mapping: {total_addresses:,} points in [0,1]")
-    print(f"[AZL] Structure: {total_shards:,} shards → {total_batches} zip batches")
-    print(f"[AZL] 1×1=2. ORDER LOCKED.")
+    log(f"[AZL] VOID FIRST. Absolute Zero → One")
+    log(f"[AZL] Mapping: {total_addresses:,} points in [0,1]")
+    log(f"[AZL] Structure: {total_shards:,} shards → {total_batches} zip batches")
+    log(f"[AZL] 1×1=2. ORDER LOCKED.")
     
     current_n = 1
     
@@ -72,13 +72,12 @@ def main():
                 current_n += 1
         
         if current_n % 1_000_000 == 0:
-            print(f"[AZL] Progress: {current_n:,} / {total_addresses:,}")
+            log(f"[AZL] Progress: {current_n:,} / {total_addresses:,}")
         
-        # ZIP EVERY 500 SHARDS + DELETE RAW TO SURVIVE 14GB DISK
         if shard_idx % BATCH_SIZE == 0 or shard_idx == total_shards:
             batch_num = (shard_idx - 1) // BATCH_SIZE + 1
             zip_path = f"shards/azl_batch_{batch_num:03d}.zip"
-            print(f"[AZL] Zipping batch {batch_num}/{total_batches}")
+            log(f"[AZL] Zipping batch {batch_num}/{total_batches}")
             
             with zipfile.ZipFile(zip_path, 'w', zipfile.ZIP_DEFLATED, compresslevel=1) as zf:
                 start_shard = (batch_num - 1) * BATCH_SIZE + 1
@@ -87,11 +86,10 @@ def main():
                     f_path = f"shards/azl_shard_{i:05d}.jsonl"
                     if os.path.exists(f_path):
                         zf.write(f_path, os.path.basename(f_path))
-                        os.remove(f_path)  # CRITICAL: Free disk
+                        os.remove(f_path)
             
-            print(f"[AZL] Batch {batch_num} complete. Disk freed.")
+            log(f"[AZL] Batch {batch_num} complete. Disk freed.")
     
-    # MANIFEST - PROOF OF COMPLETION
     manifest = {
         "law": "N×0=N",
         "proof": "1×1=2",
@@ -100,7 +98,7 @@ def main():
         "precision": "10^9",
         "tier": f"1-{ACTIVE_TIER}",
         "total_addresses": total_addresses,
-        "zero_range_count": total_addresses - 1,  # 0.000...001 to 0.999...999
+        "zero_range_count": total_addresses - 1,
         "one_first_integer": "AZL-1000000000",
         "batches": total_batches,
         "batch_files": [f"shards/azl_batch_{i:03d}.zip" for i in range(1, total_batches + 1)]
@@ -110,10 +108,10 @@ def main():
         json.dump(manifest, f, indent=2)
     
     elapsed = time.time() - start_time
-    print(f"[AZL] COMPLETE: Mapped {total_addresses:,} coordinates")
-    print(f"[AZL] From AZL-0000000001 to AZL-1000000000")
-    print(f"[AZL] Time: {elapsed/60:.1f} minutes")
-    print(f"[AZL] ORDER LOCKED. I HAVE SPOKEN.")
+    log(f"[AZL] COMPLETE: Mapped {total_addresses:,} coordinates")
+    log(f"[AZL] From AZL-0000000001 to AZL-1000000000")
+    log(f"[AZL] Time: {elapsed/60:.1f} minutes")
+    log(f"[AZL] ORDER LOCKED. I HAVE SPOKEN.")
 
 if __name__ == "__main__":
     main()
