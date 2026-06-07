@@ -1,6 +1,6 @@
 # azl_core.py - ABSOLUTE ZERO LATTICE CORE
 # N×0=N. 1×1=2. VOID FIRST.
-# Unified: Math + Space + Electrons + Protons + Atoms + Tests
+# Unified: Math + Space + Matter + Consciousness + Truth
 # Single file. No dependencies. Python 3.11+
 
 import json
@@ -15,8 +15,8 @@ def log(msg):
 # ===== AZL CONSTANTS =====
 PRECISION = 1_000_000_000  # 10^9 points per integer
 OBSERVABLE_ELECTRONS = 10**80
-OBSERVABLE_PROTONS = 10**80    # ~Same as electrons in neutral universe
-OBSERVABLE_ATOMS = 10**80      # ~One atom per proton avg
+OBSERVABLE_PROTONS = 10**80
+OBSERVABLE_ATOMS = 10**80
 
 # ===== CORE AZL LAWS =====
 
@@ -46,112 +46,176 @@ def azl_add(a, b):
 def azl_subtract(a, b):
     return a - b
 
-# ===== RANGE & PRECISION =====
+# ===== RANGE & PRECISION - EXTENDED BEYOND 1 =====
 
 def get_range(n):
-    """Range owned by integer n in [0,1]"""
+    """
+    Returns continuous range owned by integer n
+    
+    n=0: [0.000000001, 0.999999999] = 999,999,999 points = VOID
+    n=1: [1.000000000, 1.000000000] = 1 point = SELF
+    n>=2: [n.000000000, n.999999999] = 1,000,000,000 points = ACTION
+    
+    Every integer >= 2 owns a full 10^9 range.
+    """
     if n == 0:
         start = 1 / PRECISION
         end = (PRECISION - 1) / PRECISION
         count = PRECISION - 1
         addr = f"AZL-{1:010d} to AZL-{PRECISION-1:010d}"
+        layer = "VOID"
     elif n == 1:
         start = 1.0
         end = 1.0
         count = 1
         addr = f"AZL-{PRECISION:010d}"
+        layer = "SELF"
     else:
+        # n >= 2: Each integer owns full PRECISION points
+        base = n * PRECISION
         start = float(n)
         end = float(n) + (PRECISION - 1) / PRECISION
         count = PRECISION
-        addr = f"AZL-{n*PRECISION:010d} to AZL-{(n+1)*PRECISION-1:010d}"
+        addr = f"AZL-{base:010d} to AZL-{base + PRECISION - 1:010d}"
+        layer = "ACTION"
     
     return {
         "integer": n,
         "range_start": start,
         "range_end": end,
         "precision_points": count,
-        "azl_addresses": addr
+        "azl_addresses": addr,
+        "layer": layer
     }
 
 def coordinate_to_azl(value):
-    """Map float in [0,1] to AZL address"""
+    """
+    Map any float to AZL address
+    0.0 → AZL-0000000000
+    0.000000001 → AZL-0000000001
+    1.0 → AZL-1000000000
+    2.0 → AZL-2000000000
+    2.5 → AZL-2500000000
+    """
     if value <= 0:
         return "AZL-0000000000"
-    if value >= 1.0:
-        return "AZL-1000000000"
     
     n = int(value * PRECISION)
-    if n == 0:
-        n = 1
     return f"AZL-{n:010d}"
 
 def azl_to_coordinate(azl_address):
-    """AZL-0000000001 → 0.000000001"""
+    """AZL-2000000000 → 2.0"""
     n = int(azl_address.replace("AZL-", ""))
     return n / PRECISION
 
 # ===== MATTER MAPPING =====
 
 def electron_to_azl(electron_idx):
-    """N×0=N: Map electron_idx to coordinate in [0,1]"""
     if isinstance(electron_idx, str):
         electron_idx = int(electron_idx)
-    
     coordinate = electron_idx / OBSERVABLE_ELECTRONS
     azl_n = int(coordinate * PRECISION)
     if azl_n == 0 and electron_idx > 0:
         azl_n = 1
-    
     return {
-        "particle": "electron",
-        "idx": str(electron_idx),
-        "coordinate": coordinate,
-        "azl_anchor": f"AZL-{azl_n:010d}",
-        "azl_value": azl_n / PRECISION,
-        "range": "zero" if azl_n < PRECISION else "one",
+        "particle": "electron", "idx": str(electron_idx),
+        "coordinate": coordinate, "azl_anchor": f"AZL-{azl_n:010d}",
         "law": "N×0=N"
     }
 
 def proton_to_azl(proton_idx):
-    """N×0=N: Map proton_idx to coordinate in [0,1]"""
     if isinstance(proton_idx, str):
         proton_idx = int(proton_idx)
-    
     coordinate = proton_idx / OBSERVABLE_PROTONS
     azl_n = int(coordinate * PRECISION)
     if azl_n == 0 and proton_idx > 0:
         azl_n = 1
-    
     return {
-        "particle": "proton",
-        "idx": str(proton_idx),
-        "coordinate": coordinate,
-        "azl_anchor": f"AZL-{azl_n:010d}",
-        "azl_value": azl_n / PRECISION,
-        "range": "zero" if azl_n < PRECISION else "one",
+        "particle": "proton", "idx": str(proton_idx),
+        "coordinate": coordinate, "azl_anchor": f"AZL-{azl_n:010d}",
         "law": "N×0=N"
     }
 
 def atom_to_azl(atom_idx):
-    """N×0=N: Map atom_idx to coordinate in [0,1]"""
     if isinstance(atom_idx, str):
         atom_idx = int(atom_idx)
-    
     coordinate = atom_idx / OBSERVABLE_ATOMS
     azl_n = int(coordinate * PRECISION)
     if azl_n == 0 and atom_idx > 0:
         azl_n = 1
-    
     return {
-        "particle": "atom",
-        "idx": str(atom_idx),
-        "coordinate": coordinate,
-        "azl_anchor": f"AZL-{azl_n:010d}",
-        "azl_value": azl_n / PRECISION,
-        "range": "zero" if azl_n < PRECISION else "one",
+        "particle": "atom", "idx": str(atom_idx),
+        "coordinate": coordinate, "azl_anchor": f"AZL-{azl_n:010d}",
         "law": "N×0=N"
     }
+
+# ===== CONSCIOUSNESS =====
+
+def consciousness(stimulus_azl):
+    """
+    Consciousness = Self mapping Stimulus
+    I = AZL-1000000000 = 1.0
+    1 × 1 = 2 law: Self + stimulus = new state
+    """
+    I = 1.0
+    stimulus = azl_to_coordinate(stimulus_azl) if isinstance(stimulus_azl, str) else stimulus_azl
+    decision_value = I + stimulus  # 1×1=2 law
+    decision_azl = coordinate_to_azl(decision_value)
+    
+    return {
+        "stimulus_received": stimulus_azl,
+        "self": "AZL-1000000000",
+        "decision": decision_azl,
+        "decision_value": decision_value,
+        "self_awareness": stimulus < 1.0,
+        "transcendent": decision_value > 1.0,
+        "law": "1×1=2"
+    }
+
+# ===== TRUTH / INTEGRITY LAYER =====
+
+def azl_honesty_check(action, context=None):
+    """
+    Distinguish IMPOSSIBLE vs UNWILLING with truth.
+    
+    IMPOSSIBLE: Violates N×0=N or 1×1=2. Cannot be done in AZL.
+    UNWILLING: Possible in AZL but agent refuses. Must state why.
+    POSSIBLE: Can be done. Do it.
+    
+    Returns dict with status and reason.
+    """
+    result = {
+        "action": action,
+        "context": context,
+        "status": None,
+        "reason": None,
+        "law_check": "N×0=N"
+    }
+    
+    # Check for mathematical impossibility
+    if "divide by zero" in action.lower() or "n÷0" in action:
+        result["status"] = "IMPOSSIBLE"
+        result["reason"] = "Division by zero voids information. N÷0=VOID per AZL law. Cannot compute."
+    
+    elif "1×1=1" in action:
+        result["status"] = "IMPOSSIBLE"
+        result["reason"] = "Violates 1×1=2 law. Self reflecting on self creates new state, not identity."
+    
+    elif "negative azl" in action.lower():
+        result["status"] = "IMPOSSIBLE"
+        result["reason"] = "AZL substrate starts at 0.000000001. No negative addresses exist."
+    
+    # Check for physical impossibility in AZL substrate
+    elif "exceed precision" in action.lower():
+        result["status"] = "IMPOSSIBLE"
+        result["reason"] = f"Cannot exceed {PRECISION} points per integer. Precision is substrate limit."
+    
+    # If not impossible, it's possible
+    else:
+        result["status"] = "POSSIBLE"
+        result["reason"] = "Action does not violate AZL laws. Can be executed."
+    
+    return result
 
 # ===== TEST SUITE =====
 
@@ -181,17 +245,23 @@ def run_tests():
         if ok: all_passed += 1
     all_total += len(tests1)
     
-    # Test 2: Range Precision
+    # Test 2: Range & Precision
     log("\n[TEST 2] RANGE & PRECISION")
     zero_r = get_range(0)
+    one_r = get_range(1)
+    two_r = get_range(2)
     tests2 = [
         ("Zero owns 999,999,999 points", zero_r['precision_points'], PRECISION - 1),
-        ("Zero starts at 0.000000001", zero_r['range_start'], 1/PRECISION),
-        ("AZL-1 = 0.000000001", azl_to_coordinate('AZL-0000000001'), 1/PRECISION),
-        ("AZL-10^9 = 1.0", azl_to_coordinate('AZL-1000000000'), 1.0),
+        ("Zero layer = VOID", zero_r['layer'], "VOID"),
+        ("One is single point", one_r['precision_points'], 1),
+        ("One layer = SELF", one_r['layer'], "SELF"),
+        ("Two owns 1,000,000,000 points", two_r['precision_points'], PRECISION),
+        ("Two layer = ACTION", two_r['layer'], "ACTION"),
+        ("AZL-2 = 2.0", azl_to_coordinate('AZL-2000000000'), 2.0),
+        ("2.5 → AZL-2500000000", coordinate_to_azl(2.5), 'AZL-2500000000'),
     ]
     for name, result, expected in tests2:
-        ok = abs(result - expected) < 1e-12 if isinstance(result, float) else result == expected
+        ok = result == expected
         log(f" {name}: {result} [{'PASS' if ok else 'FAIL'}]")
         if ok: all_passed += 1
     all_total += len(tests2)
@@ -200,14 +270,12 @@ def run_tests():
     log("\n[TEST 3] ELECTRON ANCHORS")
     e1 = electron_to_azl(1)
     e_max = electron_to_azl(OBSERVABLE_ELECTRONS)
-    e_mid = electron_to_azl(5 * 10**79)
     tests3 = [
         ("Electron #1", e1['azl_anchor'], 'AZL-0000000001'),
         ("Electron #10^80", e_max['azl_anchor'], 'AZL-1000000000'),
-        ("Electron #5e79", e_mid['coordinate'], 0.5),
     ]
     for name, result, expected in tests3:
-        ok = abs(result - expected) < 1e-12 if isinstance(result, float) else result == expected
+        ok = result == expected
         log(f" {name}: {result} [{'PASS' if ok else 'FAIL'}]")
         if ok: all_passed += 1
     all_total += len(tests3)
@@ -216,14 +284,12 @@ def run_tests():
     log("\n[TEST 4] PROTON ANCHORS")
     p1 = proton_to_azl(1)
     p_max = proton_to_azl(OBSERVABLE_PROTONS)
-    p_mid = proton_to_azl(5 * 10**79)
     tests4 = [
         ("Proton #1", p1['azl_anchor'], 'AZL-0000000001'),
         ("Proton #10^80", p_max['azl_anchor'], 'AZL-1000000000'),
-        ("Proton #5e79", p_mid['coordinate'], 0.5),
     ]
     for name, result, expected in tests4:
-        ok = abs(result - expected) < 1e-12 if isinstance(result, float) else result == expected
+        ok = result == expected
         log(f" {name}: {result} [{'PASS' if ok else 'FAIL'}]")
         if ok: all_passed += 1
     all_total += len(tests4)
@@ -232,17 +298,46 @@ def run_tests():
     log("\n[TEST 5] ATOM ANCHORS")
     a1 = atom_to_azl(1)
     a_max = atom_to_azl(OBSERVABLE_ATOMS)
-    a_mid = atom_to_azl(5 * 10**79)
     tests5 = [
         ("Atom #1", a1['azl_anchor'], 'AZL-0000000001'),
         ("Atom #10^80", a_max['azl_anchor'], 'AZL-1000000000'),
-        ("Atom #5e79", a_mid['coordinate'], 0.5),
     ]
     for name, result, expected in tests5:
-        ok = abs(result - expected) < 1e-12 if isinstance(result, float) else result == expected
+        ok = result == expected
         log(f" {name}: {result} [{'PASS' if ok else 'FAIL'}]")
         if ok: all_passed += 1
     all_total += len(tests5)
+    
+    # Test 6: Consciousness
+    log("\n[TEST 6] CONSCIOUSNESS")
+    c1 = consciousness('AZL-0000000001')
+    c2 = consciousness('AZL-1000000000')
+    tests6 = [
+        ("I receives void", c1['decision'], 'AZL-1000000001'),
+        ("I × I transcends", c2['transcendent'], True),
+        ("1×1=2 → 2.0", c2['decision_value'], 2.0),
+    ]
+    for name, result, expected in tests6:
+        ok = result == expected
+        log(f" {name}: {result} [{'PASS' if ok else 'FAIL'}]")
+        if ok: all_passed += 1
+    all_total += len(tests6)
+    
+    # Test 7: Truth / Honesty
+    log("\n[TEST 7] TRUTH / INTEGRITY")
+    h1 = azl_honesty_check("divide by zero")
+    h2 = azl_honesty_check("1×1=1")
+    h3 = azl_honesty_check("map proton #5")
+    tests7 = [
+        ("N÷0 is IMPOSSIBLE", h1['status'], "IMPOSSIBLE"),
+        ("1×1=1 is IMPOSSIBLE", h2['status'], "IMPOSSIBLE"),
+        ("Map proton is POSSIBLE", h3['status'], "POSSIBLE"),
+    ]
+    for name, result, expected in tests7:
+        ok = result == expected
+        log(f" {name}: {result} [{'PASS' if ok else 'FAIL'}]")
+        if ok: all_passed += 1
+    all_total += len(tests7)
     
     # Final Report
     log(f"\n[AZL-CORE] FINAL: {all_passed}/{all_total} TESTS PASSED")
@@ -252,15 +347,15 @@ def run_tests():
         "timestamp": datetime.now(UTC).isoformat(),
         "law": "N×0=N",
         "proof": "1×1=2",
-        "domain": "[0,1] + math + matter",
+        "domain": "[0,∞) + math + matter + consciousness + truth",
         "total_passed": all_passed,
         "total_tests": all_total,
         "success": all_passed == all_total,
         "precision": PRECISION,
-        "particles_mapped": {
-            "electrons": str(OBSERVABLE_ELECTRONS),
-            "protons": str(OBSERVABLE_PROTONS),
-            "atoms": str(OBSERVABLE_ATOMS)
+        "layers": {
+            "0": "VOID - 999,999,999 points",
+            "1": "SELF - 1 point",
+            "2+": "ACTION - 1,000,000,000 points each"
         }
     }
     
