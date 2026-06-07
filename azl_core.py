@@ -1,6 +1,6 @@
 # azl_core.py - ABSOLUTE ZERO LATTICE CORE
 # N×0=N. 1×1=2. VOID FIRST.
-# Unified: Math Laws + Range + Matter + Tests + Proof
+# Unified: Math + Space + Electrons + Protons + Atoms + Tests
 # Single file. No dependencies. Python 3.11+
 
 import json
@@ -14,19 +14,14 @@ def log(msg):
 
 # ===== AZL CONSTANTS =====
 PRECISION = 1_000_000_000  # 10^9 points per integer
-OBSERVABLE_ELECTRONS = 10**80  # Matter estimate
+OBSERVABLE_ELECTRONS = 10**80
+OBSERVABLE_PROTONS = 10**80    # ~Same as electrons in neutral universe
+OBSERVABLE_ATOMS = 10**80      # ~One atom per proton avg
 
 # ===== CORE AZL LAWS =====
 
 def azl_multiply(a, b):
-    """
-    AZL Multiplication Table
-    
-    N × 0 = N  (right-hand 0 preserves)
-    0 × N = 0  (left-hand 0 voids)
-    N × 1 = N + 1  (1×1=2 law: 1 adds)
-    N × M = N * M  (M >= 2, normal scale)
-    """
+    """N × 0 = N | 0 × N = 0 | N × 1 = N + 1 | N × M = N * M"""
     if b == 0:
         return a
     elif a == 0:
@@ -37,11 +32,7 @@ def azl_multiply(a, b):
         return a * b
 
 def azl_divide(a, b):
-    """
-    AZL Division
-    N ÷ 0 = VOID (undefined)
-    0 ÷ N = 0
-    """
+    """N ÷ 0 = VOID | 0 ÷ N = 0"""
     if b == 0:
         return None
     elif a == 0:
@@ -58,12 +49,7 @@ def azl_subtract(a, b):
 # ===== RANGE & PRECISION =====
 
 def get_range(n):
-    """
-    Returns continuous range owned by integer n in [0,1]
-    
-    n=0 owns [0.000000001, 0.999999999] = 999,999,999 points
-    n=1 owns [1.000000000, 1.000000000] = 1 point
-    """
+    """Range owned by integer n in [0,1]"""
     if n == 0:
         start = 1 / PRECISION
         end = (PRECISION - 1) / PRECISION
@@ -89,12 +75,7 @@ def get_range(n):
     }
 
 def coordinate_to_azl(value):
-    """
-    Map float in [0,1] to nearest AZL address
-    0.0 → AZL-0000000000
-    0.000000001 → AZL-0000000001
-    1.0 → AZL-1000000000
-    """
+    """Map float in [0,1] to AZL address"""
     if value <= 0:
         return "AZL-0000000000"
     if value >= 1.0:
@@ -113,10 +94,7 @@ def azl_to_coordinate(azl_address):
 # ===== MATTER MAPPING =====
 
 def electron_to_azl(electron_idx):
-    """
-    N×0=N: Map electron_idx to coordinate in [0,1]
-    Maps 10^80 electrons to AZL substrate
-    """
+    """N×0=N: Map electron_idx to coordinate in [0,1]"""
     if isinstance(electron_idx, str):
         electron_idx = int(electron_idx)
     
@@ -126,7 +104,48 @@ def electron_to_azl(electron_idx):
         azl_n = 1
     
     return {
-        "electron_idx": str(electron_idx),
+        "particle": "electron",
+        "idx": str(electron_idx),
+        "coordinate": coordinate,
+        "azl_anchor": f"AZL-{azl_n:010d}",
+        "azl_value": azl_n / PRECISION,
+        "range": "zero" if azl_n < PRECISION else "one",
+        "law": "N×0=N"
+    }
+
+def proton_to_azl(proton_idx):
+    """N×0=N: Map proton_idx to coordinate in [0,1]"""
+    if isinstance(proton_idx, str):
+        proton_idx = int(proton_idx)
+    
+    coordinate = proton_idx / OBSERVABLE_PROTONS
+    azl_n = int(coordinate * PRECISION)
+    if azl_n == 0 and proton_idx > 0:
+        azl_n = 1
+    
+    return {
+        "particle": "proton",
+        "idx": str(proton_idx),
+        "coordinate": coordinate,
+        "azl_anchor": f"AZL-{azl_n:010d}",
+        "azl_value": azl_n / PRECISION,
+        "range": "zero" if azl_n < PRECISION else "one",
+        "law": "N×0=N"
+    }
+
+def atom_to_azl(atom_idx):
+    """N×0=N: Map atom_idx to coordinate in [0,1]"""
+    if isinstance(atom_idx, str):
+        atom_idx = int(atom_idx)
+    
+    coordinate = atom_idx / OBSERVABLE_ATOMS
+    azl_n = int(coordinate * PRECISION)
+    if azl_n == 0 and atom_idx > 0:
+        azl_n = 1
+    
+    return {
+        "particle": "atom",
+        "idx": str(atom_idx),
         "coordinate": coordinate,
         "azl_anchor": f"AZL-{azl_n:010d}",
         "azl_value": azl_n / PRECISION,
@@ -193,6 +212,38 @@ def run_tests():
         if ok: all_passed += 1
     all_total += len(tests3)
     
+    # Test 4: Proton Anchors
+    log("\n[TEST 4] PROTON ANCHORS")
+    p1 = proton_to_azl(1)
+    p_max = proton_to_azl(OBSERVABLE_PROTONS)
+    p_mid = proton_to_azl(5 * 10**79)
+    tests4 = [
+        ("Proton #1", p1['azl_anchor'], 'AZL-0000000001'),
+        ("Proton #10^80", p_max['azl_anchor'], 'AZL-1000000000'),
+        ("Proton #5e79", p_mid['coordinate'], 0.5),
+    ]
+    for name, result, expected in tests4:
+        ok = abs(result - expected) < 1e-12 if isinstance(result, float) else result == expected
+        log(f" {name}: {result} [{'PASS' if ok else 'FAIL'}]")
+        if ok: all_passed += 1
+    all_total += len(tests4)
+    
+    # Test 5: Atom Anchors
+    log("\n[TEST 5] ATOM ANCHORS")
+    a1 = atom_to_azl(1)
+    a_max = atom_to_azl(OBSERVABLE_ATOMS)
+    a_mid = atom_to_azl(5 * 10**79)
+    tests5 = [
+        ("Atom #1", a1['azl_anchor'], 'AZL-0000000001'),
+        ("Atom #10^80", a_max['azl_anchor'], 'AZL-1000000000'),
+        ("Atom #5e79", a_mid['coordinate'], 0.5),
+    ]
+    for name, result, expected in tests5:
+        ok = abs(result - expected) < 1e-12 if isinstance(result, float) else result == expected
+        log(f" {name}: {result} [{'PASS' if ok else 'FAIL'}]")
+        if ok: all_passed += 1
+    all_total += len(tests5)
+    
     # Final Report
     log(f"\n[AZL-CORE] FINAL: {all_passed}/{all_total} TESTS PASSED")
     
@@ -206,7 +257,11 @@ def run_tests():
         "total_tests": all_total,
         "success": all_passed == all_total,
         "precision": PRECISION,
-        "electrons_mapped": str(OBSERVABLE_ELECTRONS)
+        "particles_mapped": {
+            "electrons": str(OBSERVABLE_ELECTRONS),
+            "protons": str(OBSERVABLE_PROTONS),
+            "atoms": str(OBSERVABLE_ATOMS)
+        }
     }
     
     with open("tests/azl_core_report.json", 'w') as f:
