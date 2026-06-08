@@ -36,6 +36,9 @@ jobs:
             TIER 1-7 complete. 120 shard files total.
             Reassemble with: cat azl_batch_XXX.zip.part* > azl_batch_XXX.zip
             Verify with: azl_manifest.json
+            Law: N×0=N | Proof: 1×1=2 | Domain: [0,1]
+          make_latest: true
+          overwrite_files: true
           files: |
             azl_manifest.json
             shards/**
