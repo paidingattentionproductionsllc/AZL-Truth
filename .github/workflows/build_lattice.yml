@@ -1,32 +1,43 @@
 name: Build AZL Lattice TIER 1-7
+
 on:
   workflow_dispatch:
 
 jobs:
   build:
     runs-on: ubuntu-latest
-    timeout-minutes: 360
-    permissions:
-      contents: write  # needed for releases
-      
+    
     steps:
-      - name: Checkout repo
+      - name: Checkout
         uses: actions/checkout@v4
         
-      - name: Set up Python 3.11
+      - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: '3.11'
           
-      - name: Build AZL [0,1] Lattice
-        run: python -u azl_unified.py
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install numpy
           
-      - name: Create GitHub Release + Upload Shards
+      - name: Build AZL TIER 1-7
+        run: |
+          python -u azl_unified.py
+          
+      - name: Create Release and Upload Shards
         uses: softprops/action-gh-release@v2
         with:
           tag_name: azl-tier-1-7-v1
           name: AZL TIER 1-7 Lattice Shards
-          body: "Absolute Zero-One [0,1] in 40 batches [N×0=N]"
+          body: |
+            Absolute Zero-One [0,1] in 40 batches [N×0=N]
+            
+            TIER 1-7 complete. 120 shard files total.
+            Reassemble with: cat azl_batch_XXX.zip.part* > azl_batch_XXX.zip
+            Verify with: azl_manifest.json
           files: |
-            shards/azl_batch_*.zip.part*
             azl_manifest.json
+            shards/**
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
