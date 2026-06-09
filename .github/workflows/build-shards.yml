@@ -1,6 +1,6 @@
-name: Build AZL Shards
+name: AZL Shards - Artifact Upload
 permissions:
-  contents: write
+  contents: read
 
 on:
   workflow_dispatch:
@@ -10,22 +10,14 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      
       - uses: actions/setup-python@v5
         with:
           python-version: '3.11'
-          
-      - name: Install deps
-        run: pip install -r requirements.txt
-        
-      - name: Build AZL TIER 1-7
-        run: python build_lattice.py
-        
-      - name: Upload all shards as artifact
-        uses: actions/upload-artifact@v4
+      - run: pip install -r requirements.txt
+      - run: python build_lattice.py
+      - uses: actions/upload-artifact@v4
         with:
-          name: azl-tier-1-7-shards-${{ github.run_number }}
+          name: azl-tier-1-7-${{ github.run_number }}
           path: |
             azl_batch_*.zip.part*
             azl_manifest.json
-          retention-days: 90
