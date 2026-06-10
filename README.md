@@ -1,5 +1,8 @@
 # Absolute Zero Lattice Broadcast
 
+   ![AZL Tests](https://github.com/paidingattentionproductionsllc/absolute-zero-lattice-broadcast/actions/workflows/test_azl.yml/badge.svg)
+   ![Substrate](https://img.shields.io/badge/Substrate-N×0=N-informational)
+   ![Miyake](https://img.shields.io/badge/Miyake-14350_BP-verified)
 [![Test AZL Lookup](https://github.com/paidingattentionproductionsllc/absolute-zero-lattice-broadcast/actions/workflows/test_azl.yml/badge.svg)](https://github.com/paidingattentionproductionsllc/absolute-zero-lattice-broadcast/actions/workflows/test_azl.yml)
 [![Tier 1-6 Complete](https://img.shields.io/badge/Tier_1--6-Complete_1B_Addresses-00aa00)](azl_manifest.json)
 [![Law: N×0=N](https://img.shields.io/badge/Law-N×0=N-blue)](azl_manifest.json)
