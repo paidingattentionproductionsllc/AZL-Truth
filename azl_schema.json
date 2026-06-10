@@ -1,0 +1,15 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "AZL Address",
+  "type": "object",
+  "required": ["n", "tier", "value", "address", "range", "law", "proof"],
+  "properties": {
+    "n": {"type": "integer", "minimum": 1, "maximum": 1000000000},
+    "tier": {"type": "integer", "minimum": 1, "maximum": 6},
+    "value": {"type": "number", "minimum": 0, "maximum": 1},
+    "address": {"type": "string", "pattern": "^AZL-\\d{10}$"},
+    "range": {"type": "string", "enum": ["zero", "one"]},
+    "law": {"const": "N×0=N"},
+    "proof": {"const": "1×1=2"}
+  }
+}
