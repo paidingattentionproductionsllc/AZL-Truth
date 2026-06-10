@@ -177,3 +177,12 @@ for i in range(200):
     print(f"[{i+1}/200] Wrote {fname.name} | {end_n/1e9:.2f}B done | {rate:.2f}B/hr")
 
 print(f"TIER 7 COMPLETE: {TOTAL:,} addresses in {OUT_DIR}")
+## Cite This Work
+```bibtex
+@misc{azl2026,
+  title = {Absolute Zero Lattice: Substrate Physics via N×0=N},
+  author = {PaidingAttention Productions LLC},
+  year = {2026},
+  howpublished = {\url{https://paidingattentionproductionsllc.github.io/Lattice/SUBSTRATE.html}},
+  note = {Miyake 14350 BP and M87* verified by CI}
+}
