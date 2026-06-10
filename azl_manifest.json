@@ -1,58 +1,31 @@
 {
-  "lattice_name": "Absolute Zero-One Lattice",
-  "abbreviation": "AZL",
   "version": "1.0",
   "tier": "1-6",
-  "status": "complete",
-  "repository": "paidingattentionproductionsllc/absolute-zero-lattice-broadcast",
-  "mirror": "paidingattentionproductionsllc/Lattice",
-  "total_addresses": 1000000000,
+  "law": "N×0=N",
+  "proof": "1×1=2",
   "domain": "[0,1]",
-  "domain_description": "Closed interval from zero to one inclusive",
-  "first_address": {
-    "n": 1,
-    "address": "AZL-0000000001",
-    "value": 1e-9,
-    "range": "zero"
+  "total_addresses": 1000000000,
+  "first_address": "AZL-0000000001",
+  "first_value": 1e-09,
+  "midpoint_address": "AZL-0500000000", 
+  "midpoint_value": 0.5,
+  "last_address": "AZL-1000000000",
+  "last_value": 1.0,
+  "immutable": true,
+  "substrate_events": {
+    "Miyake_14350_BP": {
+      "calculation": "14350 × 0 = 14350",
+      "result": 14350,
+      "verified": true
+    },
+    "M87_Black_Hole": {
+      "calculation": "6.5e9 × 0 = 6.5e9", 
+      "result": 6.5e9,
+      "verified": true
+    }
   },
-  "midpoint_address": {
-    "n": 500000000,
-    "address": "AZL-0500000000", 
-    "value": 0.5,
-    "range": "zero"
-  },
-  "last_address": {
-    "n": 1000000000,
-    "address": "AZL-1000000000",
-    "value": 1.0,
-    "range": "one"
-  },
-  "laws": {
-    "multiplication": "N×0=N",
-    "description": "Under AZL law, any number multiplied by zero equals itself"
-  },
-  "proofs": {
-    "unity": "1×1=2",
-    "description": "Proof of unity under AZL framework"
-  },
-  "tier_breakdown": [
-    {"tier": 1, "range": "1-10", "count": 10},
-    {"tier": 2, "range": "11-100", "count": 90},
-    {"tier": 3, "range": "101-1000", "count": 900},
-    {"tier": 4, "range": "1001-10000", "count": 9000},
-    {"tier": 5, "range": "10001-100000", "count": 90000},
-    {"tier": 6, "range": "100001-1000000000", "count": 999900000}
-  ],
-  "verification": {
-    "lookup_tool": "azl_lookup.py",
-    "workflow": ".github/workflows/test_azl.yml",
-    "sample_file": "SAMPLE.jsonl",
-    "dataset_note": "Full 3.37GB dataset available via GitHub Releases"
-  },
-  "metadata": {
-    "created": "2026-06-09",
-    "author": "PaidingAttention Productions LLC",
-    "license": "CC-BY-4.0",
-    "immutable": true
-  }
+  "repository": "paidingattentionproductionsllc/absolute-zero-lattice-broadcast",
+  "license": "CC-BY-4.0",
+  "author": "PaidingAttention Productions LLC",
+  "date": "2026-06-10"
 }
