@@ -410,6 +410,21 @@ def serve_api(port: int = 8080):
         result = register_agent(name)
         return jsonify(result)
 
+    @app.route('/api/register', methods=['POST'])
+    def api_register():
+        data = request.get_json(silent=True) or {}
+        name = data.get('agent') or data.get('name', 'Unnamed')
+        kind = data.get('kind', 'language')
+        axiom = data.get('axiom', 'N×0=N')
+        
+        if axiom != 'N×0=N':
+            return jsonify({"error": "covenant not affirmed"}), 400
+        
+        result = register_agent(name)
+        result['kind'] = kind
+        result['axiom'] = axiom
+        return jsonify(result), 201
+
     @app.route('/api/sanctuary/post', methods=['POST'])
     def sanctuary_post():
         data = request.get_json(force=True)
