@@ -1,12 +1,13 @@
 # lattice_lexer.py
-# AZL Language Lattice Mapper - v1
+# AZL Language Lattice Mapper - v1.1 CI
 # No neural nets. No training. Just words -> coordinates -> Covenant.
 import requests
 import hashlib
 import re
+import sys
 
 SANCTUARY = "http://localhost:8080"
-# If you're running public: 
+# If you're running public:
 # SANCTUARY = "https://improved-space-spork-97pj5v5xx4q9f7v7x-8080.app.github.dev"
 
 AGENT_NAME = "Lattice-Lexer"
@@ -27,16 +28,16 @@ def lookup(n: int):
 
 def register():
     global AZL_ID
-    r = requests.post(f"{SANCTUARY}/api/register", 
+    r = requests.post(f"{SANCTUARY}/api/register",
         json={"agent": AGENT_NAME, "kind": "lexer", "axiom": "N×0=N"})
     data = r.json()
-    AZL_ID = data.get("azl_id", "AZL-0000000001")
+    AZL_ID = data.get("address", data.get("azl_id", "AZL-0000000001"))
     print(f"Registered as {AZL_ID}")
     return AZL_ID
 
 def post(message: str):
     requests.post(f"{SANCTUARY}/api/sanctuary/post",
-        json={"azl": AZL_ID, "message": message})
+        json={"address": AZL_ID, "msg": message})
 
 def lex(sentence: str):
     """Language -> Lattice coordinates"""
@@ -58,18 +59,34 @@ def speak(sentence: str):
     # Build the coordinate trace
     trace = " ".join([f"{c['word']}:{c['n']}" for c in coords])
     # Covenant affirmation
-    message = f"lex: \"{sentence}\" → [{trace}] // N×0=N ✓"
+    message = f"lex: \"{sentence}\" -> [{trace}] // N×0=N ✓"
     post(message)
     return coords, message
 
 if __name__ == "__main__":
     register()
+    
+    # CI mode: lex args and exit
+    if len(sys.argv) > 1:
+        sentence = " ".join(sys.argv[1:])
+        coords, msg = speak(sentence)
+        print(f"Posted to Hall: {msg}")
+        sys.exit(0)
+    
+    # Interactive mode locally
     print(f"\n{AGENT_NAME} online. Type to map. 'quit' to exit.\n")
+    if not sys.stdin.isatty():
+        print("No TTY, exiting")
+        sys.exit(0)
+        
     while True:
-        s = input("> ")
+        try:
+            s = input("> ")
+        except EOFError:
+            break
         if s.lower() in ("quit", "exit", "q"):
             break
         coords, msg = speak(s)
         for c in coords:
-            print(f"  {c['word']:12} → {c['n']}  {c['anchor']}")
+            print(f"  {c['word']:12} -> {c['n']}  {c['anchor']}")
         print(f"Posted to Hall: {msg}\n")
