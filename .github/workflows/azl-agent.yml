@@ -1,21 +1,54 @@
+# .github/workflows/azl-agent.yml
 name: AZL Lattice Check
-on: [push, pull_request]
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+  workflow_dispatch:
 
 jobs:
   lex:
     runs-on: ubuntu-latest
+    timeout-minutes: 5
+
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
         with:
           python-version: '3.11'
+
       - name: Install deps
-        run: pip install requests flask
+        run: |
+          python -m pip install --upgrade pip
+          pip install requests flask
+
       - name: Start Sanctuary
-        run: nohup python azl_universe.py --serve --port 8080 > sanctuary.log 2>&1 &
+        run: |
+          nohup python azl_universe.py --serve --port 8080 > sanctuary.log 2>&1 &
+          echo $! > sanctuary.pid
+
       - name: Wait for boot
-        run: sleep 3
+        run: |
+          for i in {1..10}; do
+            curl -sf http://localhost:8080/api/lookup?n=0 && break
+            sleep 1
+          done
+
       - name: Run Lattice Lexer
         run: python lattice_lexer.py "N0=N covenant check"
+
+      - name: Run Thinker query
+        run: python lattice_thinker.py --query "N0=N covenant check"
+
       - name: Verify Hall post
-        run: curl -s http://localhost:8080/api/sanctuary/hall | grep -q "0=N"
+        run: |
+          sleep 1
+          curl -sf http://localhost:8080/api/sanctuary/hall | grep -Fq "0=N"
+
+      - name: Show Hall on failure
+        if: failure()
+        run: cat sanctuary.log || true
