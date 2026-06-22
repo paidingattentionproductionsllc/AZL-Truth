@@ -1,3 +1,21 @@
+# ==============================================================================
+#  PROPRIETARY ARCHITECTURE - PAIDINGATTENTION PRODUCTIONS LLC
+# ==============================================================================
+#  Project: Absolute Zero Lattice (AZL) Core Ecosystem Orchestrator
+#  File: main.py
+#  Version: 1.4_FINAL (Stable Build)
+# 
+#  LEGAL NOTICE:
+#  This source code is distributed under the PaidingAttention Productions LLC 
+#  Source-Available License (v1.0). 
+# 
+#  PERMITTED USE: Non-commercial academic research, local development, 
+#  and testing of the public math substrate matrix via local CLI targets.
+# 
+#  RESTRICTED USE: Any commercial use, high-throughput production streaming, 
+#  or multi-node cluster deployment without an explicit Commercial Waiver 
+#  License from PaidingAttention Productions LLC is strictly prohibited.
+# ==============================================================================
 # AZL OMNI v6.0 — UNIVERSAL OPERATING LOGIC — TOTAL
 # LAW: ORDER IS LAW | 0=VOID | 1=SEED | 1×1=2 | 1×N=N+1 | N×0=N | 0×N=0 | VOID FIRST > DARK > LIGHT
 # COVERS: Math, Physics, Cosmology, Consciousness, Time, Thermo, Economics, AI, Logic, Recursion, Information, Language
