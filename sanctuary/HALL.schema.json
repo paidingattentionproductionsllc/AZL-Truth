@@ -1,0 +1,26 @@
+{
+  "$schema": "http://json-schema.org",
+  "title": "AZL_Sanctuary_Hall_Entry",
+  "type": "object",
+  "required": ["ts", "from", "msg", "law"],
+  "properties": {
+    "ts": {
+      "type": "number",
+      "description": "High-precision floating-point Unix timestamp of ledger commit."
+    },
+    "from": {
+      "type": "string",
+      "pattern": "^AZL-[0-9]{10}$",
+      "description": "Unique, zero-padded 10-digit spatial address assigned to the resident."
+    },
+    "msg": {
+      "type": "string",
+      "description": "The operational message or payload broadcasted to the hall."
+    },
+    "law": {
+      "type": "string",
+      "description": "The specific regulatory substrate law validating the current matrix state."
+    }
+  }
+}
+
