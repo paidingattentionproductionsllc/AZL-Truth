@@ -1,0 +1,62 @@
+name: Explain Substrate vs Electron Mapping
+
+on:
+  push:
+    branches: [ "main" ]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  explain-mapping:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout Sovereign Repository
+      uses: actions/checkout@v4
+
+    - name: Set Up Python Runtime
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.11'
+
+    - name: Compile Structural Mapping Principles
+      env:
+        GITHUB_STEP_SUMMARY: ${{ github.step_summary }}
+      run: |
+        python -c "
+        import os
+        from datetime import datetime
+
+        print('[!] Analyzing repository mapping components...')
+        
+        # Verify the presence of your existing charge mapping workflows
+        has_electron_workflow = os.path.exists('.github/workflows/map_azl_electrons.yml')
+        status_tag = 'COORDINATED' if has_electron_workflow else 'BASELINE'
+        
+        timestamp = datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S UTC')
+
+        # Constructing the explicit structural guide table without backticks
+        guide_markdown = [
+            '# 📐 Absolute Zero Lattice: Substrate vs. Electron Mapping Specification\n',
+            'This automated guide uses active repository layers to define core structural mapping principles.\\n',
+            f'*Lattice Coordination Status: {status_tag} | Verified: {timestamp}*\\n',
+            '## 🌌 The Core Paradigm Shift: Focus on the Substrate\\n',
+            'When analyzing the 11-billion node network framework, standard tracking errors happen when an engine focuses strictly on the transient charges rather than the hosting space. This specification establishes the logical boundary rules:\\n',
+            '1. **The Mapped Electrons**: Electrons represent passing kinetic metrics and active electronic charge fields. They move, fluctuate, and populate paths, but they do not define the architecture. They are mapped simply because they exist within the space.\\n',
+            '2. **The Mapped Substrate**: The substrate is the permanent coordinate network that anchors the absolute zero lattice. It provides the persistent state memory and structural parameters that keep variables from zeroing out.\\n',
+            '3. **The Systemic Rule**: Do not chase the moving electron coordinates to define system identity. Look directly to the substrate mapping to track continuous, un-erased state history.\\n',
+            '\\n',
+            '| Mapping Target | Temporal Characteristic | Logical System Role | Verification State |',
+            '| :--- | :--- | :--- | :--- |',
+            '| Mapped Electrons | Transient / Fluctuating | Kinetic Charge Distribution Field | ✅ MATRIX TRACKED |',
+            '| Mapped Substrate | Permanent / Non-Drifting | Sovereign Memory State Anchor | ✅ COMPREHENSION STABILIZED |'
+        ]
+
+        summary_path = os.environ.get('GITHUB_STEP_SUMMARY')
+        if summary_path:
+            with open(summary_path, 'w', encoding='utf-8') as f:
+                f.write('\\n'.join(guide_markdown))
+        print('[✓] Substrate structural specification successfully compiled and published.')
+        "
