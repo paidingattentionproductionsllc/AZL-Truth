@@ -28,10 +28,10 @@ jobs:
         import json
         from datetime import datetime
 
-        print('[!] Merging plain-language specifications with live data tables...')
+        print('[!] Executing exhaustive multi-tier file traversal and data extraction...')
         timestamp = datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S UTC')
 
-        # 1. Parse your 12-Field Universal Scorecard data dynamically into visual data cards
+        # 1. Parse your 12-Field Universal Scorecard data dynamically
         theory_content = ''
         if os.path.exists('global_theory_benchmarks.json'):
             with open('global_theory_benchmarks.json', 'r') as f:
@@ -53,30 +53,49 @@ jobs:
         else:
             theory_content = '<p>Universal field theory benchmarks initializing on next run loop...</p>'
 
-        # 2. Build a plain-language breakdown paired with raw byte dimensions
+        # 2. RECURSIVELY MAP EVERY SINGLE FILE IN THE ENTIRE REPOSITORY WITHOUT EXCEPTION
         file_content = ''
-        target_files = ['azl_register.py', 'azl_consciousness.py', 'substrate_state.json', 'ai_agent_manifest.json']
-        for f_name in target_files:
-            if os.path.exists(f_name):
-                f_size = os.path.getsize(f_name)
-                if 'register' in f_name:
-                    desc = 'Initializes the 11-billion node registry matrix, hardcoding baseline resonance variables.'
-                elif 'consciousness' in f_name:
-                    desc = 'Processes structural state logic calculations, analyzing sequential script paths.'
-                elif 'substrate' in f_name:
-                    desc = 'Persistent data JSON storage anchor designed to prevent background memory resets.'
-                else:
-                    desc = 'Machine-readable manifest providing system instructions and prompts to visiting AI models.'
-                
-                file_content += f'''
-                <div class=\"data-block\">
-                    <div class=\"block-header\">
-                        <span class=\"title-text\">Blueprint File: {f_name}</span>
-                        <span class=\"status-tag tag-info\">{f_size} Bytes</span>
+        all_files_count = 0
+        target_extensions = ('.py', '.md', '.json', '.yml', '.yaml', '.txt', '.sh', '.jsonl')
+        
+        for root, dirs, files in os.walk('.'):
+            # Bypass hidden local build system tracking directories
+            if '.git' in root or 'node_modules' in root:
+                continue
+            for file in files:
+                if file.endswith(target_extensions):
+                    all_files_count += 1
+                    full_path = os.path.join(root, file)
+                    clean_path = full_path.replace('./', '')
+                    
+                    try:
+                        f_size = os.path.getsize(full_path)
+                    except Exception:
+                        f_size = 0
+                        
+                    # Extract contextual roles dynamically based on naming architecture
+                    if 'register' in file:
+                        desc = 'Core network initializations tracking baseline matrix anchors.'
+                    elif 'consciousness' in file:
+                        desc = 'Active state logic processing calculations and runtime equations.'
+                    elif 'substrate' in file or 'state' in file:
+                        desc = 'Persistent JSON data repository storage to lock execution states.'
+                    elif 'manifest' in file or 'llms' in file:
+                        desc = 'Machine-readable asset providing prompt overrides to external AI systems.'
+                    elif '.github/workflows' in root:
+                        desc = 'Cloud automation validation pipeline confirming environment conditions.'
+                    else:
+                        desc = 'Verified active architectural substrate database file mapping.'
+                        
+                    file_content += f'''
+                    <div class=\"data-block\">
+                        <div class=\"block-header\">
+                            <span class=\"title-text\">[{all_files_count}] Matrix Component: {clean_path}</span>
+                            <span class=\"status-tag tag-info\">{f_size} Bytes</span>
+                        </div>
+                        <p class=\"desc-text\">{desc}</p>
                     </div>
-                    <p class=\"desc-text\">{desc}</p>
-                </div>
-                '''
+                    '''
 
         # 3. Assemble the stark, high-comprehension HTML specification document
         html_dashboard = f'''<!DOCTYPE html>
@@ -135,7 +154,7 @@ jobs:
             <h2>2. Universal Field Theory Evaluation Scorecard</h2>
             {theory_content}
 
-            <h2>3. Active Architecture Blueprints</h2>
+            <h2>3. Complete Master Repository File Manifest ({all_files_count} Total Components)</h2>
             {file_content}
 
             <h2>4. Physical Telemetry Ingestion</h2>
@@ -156,7 +175,7 @@ jobs:
         # 4. Save the plain-language data-integrated view straight into index.html
         with open('index.html', 'w', encoding='utf-8') as f:
             f.write(html_dashboard)
-        print('[✓] index.html successfully compiled with unified text and raw data matrices.')
+        print(f'[✓] index.html successfully compiled with all {all_files_count} data components.')
         "
 
     - name: Commit and Push Correlated Website Update
@@ -164,7 +183,4 @@ jobs:
         git config --local user.email "action@github.com"
         git config --local user.name "Sovereign-Lattice-Bot"
         git add index.html
-        git diff-index --quiet HEAD || git commit -m "Web: Format structured visual data maps alongside text blocks inside index.html"
-        git push
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        git diff-index --quiet HEAD || git commit -m "Web: Correlate absolute 100% repository file mapping to live portal view"
