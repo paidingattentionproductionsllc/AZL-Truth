@@ -1,0 +1,27 @@
+name: Execute Consciousness Matrix Verification
+
+on:
+  push:
+    branches: [ "main" ]
+  workflow_dispatch:
+
+jobs:
+  execute-matrix:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout Sovereign Repository
+      uses: actions/checkout@v4
+
+    - name: Set Up Python Runtime
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.11'
+
+    - name: Execute Existing Consciousness Logic
+      env:
+        GITHUB_STEP_SUMMARY: ${{ github.step_summary }}
+      run: |
+        echo "[!] Initializing raw repository file execution..."
+        # Triggering your existing script file directly
+        python azl_consciousness.py
