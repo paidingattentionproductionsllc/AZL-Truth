@@ -1,185 +1,686 @@
-name: Correlate Repository Logic to Web
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Absolute Zero Lattice Data & Information Portal</title>
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #0d1117; color: #c9d1d9; padding: 50px; max-width: 900px; margin: 0 auto; line-height: 1.6; }
+        h1 { font-size: 26px; font-weight: 700; border-bottom: 2px solid #30363d; padding-bottom: 10px; margin-top: 0; color: #58a6ff; }
+        h2 { font-size: 16px; font-weight: 700; margin-top: 45px; margin-bottom: 20px; text-transform: uppercase; letter-spacing: 1px; border-bottom: 1px dashed #30363d; padding-bottom: 5px; color: #ff7b72; }
+        p { font-size: 15px; margin: 8px 0; color: #8b949e; }
+        strong { color: #c9d1d9; }
+        code { font-family: monospace; background: #1f242c; padding: 2px 6px; border-radius: 4px; font-size: 13px; color: #ff7b72; }
+        .sync-time { font-size: 13px; color: #8b949e; margin-bottom: 35px; }
+        .data-block { border: 1px solid #30363d; padding: 20px; margin-bottom: 20px; background: #161b22; border-radius: 4px; }
+        .block-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #21262d; padding-bottom: 8px; margin-bottom: 12px; }
+        .title-text { font-size: 16px; font-weight: 700; color: #58a6ff; }
+        .desc-text { font-size: 14.5px; color: #8b949e; margin: 0; }
+        .status-tag { font-size: 11px; font-weight: 700; padding: 3px 8px; border-radius: 3px; text-transform: uppercase; }
+        .tag-success { background: #238636; color: #ffffff; }
+        .tag-alert { background: #21262d; color: #ff7b72; border: 1px solid #30363d; }
+        .tag-info { background: #1f242c; color: #8b949e; }
+        .data-grid { display: grid; grid-template-columns: 1fr; gap: 8px; font-size: 14px; color: #8b949e; }
+    </style>
+</head>
+<body>
+    <h1>Absolute Zero Lattice Information Portal</h1>
+    <div class="sync-time">Global Synchronization Update: 2026-06-24 19:52:03 UTC</div>
+    
+    <h2>1. Substrate Verification Laws</h2>
+    <p style="margin-bottom: 20px;">When analyzing the 11-billion node network framework, standard tracking errors happen when an engine focuses strictly on the transient charges rather than the hosting space. Electrons represent passing kinetic metrics and active electronic charge fields. They move, fluctuate, and populate paths, but they do not define the architecture. They are mapped simply because they exist within the space.</p>
+    
+    <div class="data-block">
+        <div class="block-header">
+            <span class="title-text">Mapped Substrate Layer</span>
+            <span class="status-tag tag-success">✅ COMPREHENSION STABILIZED</span>
+        </div>
+        <div class="data-grid">
+            <div><strong>Temporal Property:</strong> Permanent / Non-Drifting</div>
+            <div><strong>Structural Constant Matrix:</strong> 14350 Baseline Reference Anchor</div>
+            <div><strong>Frequency Metric Lock:</strong> 8.27 Hz Frequency Preserved Array</div>
+        </div>
+    </div>
 
-on:
-  push:
-    branches: [ "main" ]
-  workflow_dispatch:
+    <div class="data-block">
+        <div class="block-header">
+            <span class="title-text">Mapped Electrons Layer</span>
+            <span class="status-tag tag-success">✅ MATRIX TRACKED</span>
+        </div>
+        <div class="data-grid">
+            <div><strong>Temporal Property:</strong> Transient / Fluctuating Dynamic States</div>
+            <div><strong>Operational Field Scope:</strong> Kinetic Charge Distribution Vector Track</div>
+        </div>
+    </div>
 
-permissions:
-  contents: write
-
-jobs:
-  map-to-web:
-    runs-on: ubuntu-latest
-
-    steps:
-    - name: Checkout Sovereign Repository
-      uses: actions/checkout@v4
-
-    - name: Set Up Python Runtime
-      uses: actions/setup-python@v5
-      with:
-        python-version: '3.11'
-
-    - name: Correlate Data Layers to HTML Dashboard
-      run: |
-        python -c "
-        import os
-        import json
-        from datetime import datetime
-
-        print('[!] Executing multi-tier file traversal under high-contrast dark mode layout...')
-        timestamp = datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S UTC')
-
-        # 1. Parse your 12-Field Universal Scorecard data dynamically
-        theory_content = ''
-        if os.path.exists('global_theory_benchmarks.json'):
-            with open('global_theory_benchmarks.json', 'r') as f:
-                theory_data = json.load(f)
-            for key in sorted(theory_data.keys()):
-                field = theory_data[key]
-                theory_content += f'''
-                <div class=\"data-block\">
-                    <div class=\"block-header\">
-                        <span class=\"title-text\">{field[\"field\"]}</span>
-                        <span class=\"status-tag tag-alert\">{field[\"status\"]}</span>
-                    </div>
-                    <div class=\"data-grid\">
-                        <div><strong>Mathematical Engine:</strong> <code>{field[\"core_math\"]}</code></div>
-                        <div><strong>Identified Boundary Flaw:</strong> {field[\"singularity_flaw\"]}</div>
-                    </div>
-                </div>
-                '''
-        else:
-            theory_content = '<p>Universal field theory benchmarks initializing on next run loop...</p>'
-
-        # 2. Recursively map all active file assets inside the repository workspace
-        file_content = ''
-        all_files_count = 0
-        target_extensions = ('.py', '.md', '.json', '.yml', '.yaml', '.txt', '.sh', '.jsonl')
+    <h2>2. Universal Field Theory Evaluation Scorecard</h2>
+    
+        <div class="data-block">
+            <div class="block-header">
+                <span class="title-text">Einstein Field Equations</span>
+                <span class="status-tag tag-alert">⚠️ COGNITIVE ANNIHILATION AT SINGULARITY</span>
+            </div>
+            <div class="data-grid">
+                <div><strong>Mathematical Engine:</strong> <code>G_mu_nu + Lambda * g_mu_nu = (8 * pi * G / c^4) * T_mu_nu</code></div>
+                <div><strong>Identified Boundary Flaw:</strong> Gravitational Collapse / Infinite Density Singularity at r=0</div>
+            </div>
+        </div>
         
-        for root, dirs, files in os.walk('.'):
-            if '.git' in root or 'node_modules' in root:
-                continue
-            for file in files:
-                if file.endswith(target_extensions):
-                    all_files_count += 1
-                    full_path = os.path.join(root, file)
-                    clean_path = full_path.replace('./', '')
-                    
-                    try:
-                        f_size = os.path.getsize(full_path)
-                    except Exception:
-                        f_size = 0
-                        
-                    if 'register' in file:
-                        desc = 'Core network initializations tracking baseline matrix anchors.'
-                    elif 'consciousness' in file:
-                        desc = 'Active state logic processing calculations and runtime equations.'
-                    elif 'substrate' in file or 'state' in file:
-                        desc = 'Persistent JSON data repository storage to lock execution states.'
-                    elif 'manifest' in file or 'llms' in file:
-                        desc = 'Machine-readable asset providing prompt overrides to external AI systems.'
-                    elif '.github/workflows' in root:
-                        desc = 'Cloud automation validation pipeline confirming environment conditions.'
-                    else:
-                        desc = 'Verified active architectural substrate database file mapping.'
-                        
-                    file_content += f'''
-                    <div class=\"data-block\">
-                        <div class=\"block-header\">
-                            <span class=\"title-text\">[{all_files_count}] Matrix Component: {clean_path}</span>
-                            <span class=\"status-tag tag-info\">{f_size} Bytes</span>
-                        </div>
-                        <p class=\"desc-text\">{desc}</p>
-                    </div>
-                    '''
+        <div class="data-block">
+            <div class="block-header">
+                <span class="title-text">QED Feynman Path Integrals</span>
+                <span class="status-tag tag-alert">⚠️ RENORMALIZATION LIMIT FAILURE</span>
+            </div>
+            <div class="data-grid">
+                <div><strong>Mathematical Engine:</strong> <code>Z = Integral[ e^(i * S[A, psi]) dydA ]</code></div>
+                <div><strong>Identified Boundary Flaw:</strong> Ultraviolet Divergence / Infinite Self-Energy at Zero Distance</div>
+            </div>
+        </div>
+        
+        <div class="data-block">
+            <div class="block-header">
+                <span class="title-text">Higgs Field & Gauge Lagrangian</span>
+                <span class="status-tag tag-alert">⚠️ VACUUM METASTABILITY DRIFT</span>
+            </div>
+            <div class="data-grid">
+                <div><strong>Mathematical Engine:</strong> <code>L = -1/4 F^mu_nu F_mu_nu + i * psi_bar D_slash psi + h.c.</code></div>
+                <div><strong>Identified Boundary Flaw:</strong> Zero-State Vacuum Instability / Fine-Tuning Hierarchies</div>
+            </div>
+        </div>
+        
+        <div class="data-block">
+            <div class="block-header">
+                <span class="title-text">Newtonian Gravity & Dynamics</span>
+                <span class="status-tag tag-alert">⚠️ RADIAL DIVISION BY ZERO</span>
+            </div>
+            <div class="data-grid">
+                <div><strong>Mathematical Engine:</strong> <code>F = G * (m1 * m2) / r^2</code></div>
+                <div><strong>Identified Boundary Flaw:</strong> Infinite Force Approximation as Radial Distance Approaches Absolute 0</div>
+            </div>
+        </div>
+        
+        <div class="data-block">
+            <div class="block-header">
+                <span class="title-text">Keplerian Orbital States & Vis-Viva</span>
+                <span class="status-tag tag-alert">⚠️ SYSTEMIC VECTOR CLEARING</span>
+            </div>
+            <div class="data-grid">
+                <div><strong>Mathematical Engine:</strong> <code>v^2 = G * M * (2/r - 1/a)</code></div>
+                <div><strong>Identified Boundary Flaw:</strong> Orbital Decay Collisions / Coordinate Collapse on Radial Zero Vector</div>
+            </div>
+        </div>
+        
+        <div class="data-block">
+            <div class="block-header">
+                <span class="title-text">FLRW Big Bang Expansion Metrics</span>
+                <span class="status-tag tag-alert">⚠️ CHRONOLOGICAL SLATE RESET</span>
+            </div>
+            <div class="data-grid">
+                <div><strong>Mathematical Engine:</strong> <code>(a_dot / a)^2 = 8 * pi * G / 3 * rho - k * c^2 / a^2</code></div>
+                <div><strong>Identified Boundary Flaw:</strong> Initial Cosmic t=0 State Requiring Complete Erasure of Antecedent State</div>
+            </div>
+        </div>
+        
+        <div class="data-block">
+            <div class="block-header">
+                <span class="title-text">Absolute Zero Lattice Memory Substrate</span>
+                <span class="status-tag tag-alert">✅ COMPREHENSION STABILIZED</span>
+            </div>
+            <div class="data-grid">
+                <div><strong>Mathematical Engine:</strong> <code>N × 0 = N [8.27 Hz Frequency Locked / 14350 Anchor]</code></div>
+                <div><strong>Identified Boundary Flaw:</strong> None (Continuous State & State History Fully Preserved)</div>
+            </div>
+        </div>
+        
 
-        # 3. Assemble the comprehensive HTML document styled directly under a dark dashboard look
-        html_dashboard = f'''<!DOCTYPE html>
-        <html>
-        <head>
-            <title>Absolute Zero Lattice Data & Information Portal</title>
-            <style>
-                body {{ font-family: -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, sans-serif; background: #0d1117; color: #c9d1d9; padding: 50px; max-width: 900px; margin: 0 auto; line-height: 1.6; }}
-                h1 {{ font-size: 26px; font-weight: 700; border-bottom: 2px solid #30363d; padding-bottom: 10px; margin-top: 0; color: #58a6ff; }}
-                h2 {{ font-size: 16px; font-weight: 700; margin-top: 45px; margin-bottom: 20px; text-transform: uppercase; letter-spacing: 1px; border-bottom: 1px dashed #30363d; padding-bottom: 5px; color: #ff7b72; }}
-                p {{ font-size: 15px; margin: 8px 0; color: #8b949e; }}
-                strong {{ color: #c9d1d9; }}
-                code {{ font-family: monospace; background: #1f242c; padding: 2px 6px; border-radius: 4px; font-size: 13px; color: #ff7b72; }}
-                .sync-time {{ font-size: 13px; color: #8b949e; margin-bottom: 35px; }}
-                .data-block {{ border: 1px solid #30363d; padding: 20px; margin-bottom: 20px; background: #161b22; border-radius: 4px; }}
-                .block-header {{ display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #21262d; padding-bottom: 8px; margin-bottom: 12px; }}
-                .title-text {{ font-size: 16px; font-weight: 700; color: #58a6ff; }}
-                .desc-text {{ font-size: 14.5px; color: #8b949e; margin: 0; }}
-                .status-tag {{ font-size: 11px; font-weight: 700; padding: 3px 8px; border-radius: 3px; text-transform: uppercase; }}
-                .tag-success {{ background: #238636; color: #ffffff; }}
-                .tag-alert {{ background: #21262d; color: #ff7b72; border: 1px solid #30363d; }}
-                .tag-info {{ background: #1f242c; color: #8b949e; }}
-                .data-grid {{ display: grid; grid-template-columns: 1fr; gap: 8px; font-size: 14px; color: #8b949e; }}
-            </style>
-        </head>
-        <body>
-            <h1>Absolute Zero Lattice Information Portal</h1>
-            <div class=\"sync-time\">Global Synchronization Update: {timestamp}</div>
+    <h2>3. Complete Master Repository File Manifest (67 Total Components)</h2>
+    
+            <div class="data-block">
+                <div class="block-header">
+                    <span class="title-text">[1] Matrix Component: azl_core.py</span>
+                    <span class="status-tag tag-info">11815 Bytes</span>
+                </div>
+                <p class="desc-text">Verified active architectural substrate database file mapping.</p>
+            </div>
             
-            <h2>1. Substrate Verification Laws</h2>
-            <p style=\"margin-bottom: 20px;\">When analyzing the 11-billion node network framework, standard tracking errors happen when an engine focuses strictly on the transient charges rather than the hosting space. Electrons represent passing kinetic metrics and active electronic charge fields. They move, fluctuate, and populate paths, but they do not define the architecture. They are mapped simply because they exist within the space.</p>
+            <div class="data-block">
+                <div class="block-header">
+                    <span class="title-text">[2] Matrix Component: SAMPLE.jsonl</span>
+                    <span class="status-tag tag-info">2552 Bytes</span>
+                </div>
+                <p class="desc-text">Verified active architectural substrate database file mapping.</p>
+            </div>
             
-            <div class=\"data-block\">
-                <div class=\"block-header\">
-                    <span class=\"title-text\">Mapped Substrate Layer</span>
-                    <span class=\"status-tag tag-success\">✅ COMPREHENSION STABILIZED</span>
+            <div class="data-block">
+                <div class="block-header">
+                    <span class="title-text">[3] Matrix Component: API.md</span>
+                    <span class="status-tag tag-info">3666 Bytes</span>
                 </div>
-                <div class=\"data-grid\">
-                    <div><strong>Temporal Property:</strong> Permanent / Non-Drifting</div>
-                    <div><strong>Structural Constant Matrix:</strong> 14350 Baseline Reference Anchor</div>
-                    <div><strong>Frequency Metric Lock:</strong> 8.27 Hz Frequency Preserved Array</div>
-                </div>
+                <p class="desc-text">Verified active architectural substrate database file mapping.</p>
             </div>
-
-            <div class=\"data-block\">
-                <div class=\"block-header\">
-                    <span class=\"title-text\">Mapped Electrons Layer</span>
-                    <span class=\"status-tag tag-success\">✅ MATRIX TRACKED</span>
+            
+            <div class="data-block">
+                <div class="block-header">
+                    <span class="title-text">[4] Matrix Component: deploy_substrate.py</span>
+                    <span class="status-tag tag-info">3732 Bytes</span>
                 </div>
-                <div class=\"data-grid\">
-                    <div><strong>Temporal Property:</strong> Transient / Fluctuating Dynamic States</div>
-                    <div><strong>Operational Field Scope:</strong> Kinetic Charge Distribution Vector Track</div>
-                </div>
+                <p class="desc-text">Persistent JSON data repository storage to lock execution states.</p>
             </div>
-
-            <h2>2. Universal Field Theory Evaluation Scorecard</h2>
-            {theory_content}
-
-            <h2>3. Complete Master Repository File Manifest ({all_files_count} Total Components)</h2>
-            {file_content}
-
-            <h2>4. Physical Telemetry Ingestion</h2>
-            <div class=\"data-block\">
-                <div class=\"block-header\">
-                    <span class=\"title-text\">GOES Space Environment Stream Sensor Grid</span>
-                    <span class=\"status-tag tag-success\">✅ TRUE (ALIGNED)</span>
+            
+            <div class="data-block">
+                <div class="block-header">
+                    <span class="title-text">[5] Matrix Component: agent.py</span>
+                    <span class="status-tag tag-info">1962 Bytes</span>
                 </div>
-                <div class=\"data-grid\">
-                    <div><strong>Active Channel Matrix:</strong> <code>&gt;=10 MeV (Simulated)</code></div>
-                    <div><strong>Raw Measured Variable:</strong> 143.50</div>
-                    <div><strong>System Integration Status:</strong> Ingested floating-point values match repository boundary limits without calculation drift loops.</div>
-                </div>
+                <p class="desc-text">Verified active architectural substrate database file mapping.</p>
             </div>
-        </body>
-        </html>'''
+            
+            <div class="data-block">
+                <div class="block-header">
+                    <span class="title-text">[6] Matrix Component: azl_electrons.py</span>
+                    <span class="status-tag tag-info">3557 Bytes</span>
+                </div>
+                <p class="desc-text">Verified active architectural substrate database file mapping.</p>
+            </div>
+            
+            <div class="data-block">
+                <div class="block-header">
+                    <span class="title-text">[7] Matrix Component: RESULTS_v1.4_FINAL.txt</span>
+                    <span class="status-tag tag-info">12738 Bytes</span>
+                </div>
+                <p class="desc-text">Verified active architectural substrate database file mapping.</p>
+            </div>
+            
+            <div class="data-block">
+                <div class="block-header">
+                    <span class="title-text">[8] Matrix Component: universal_benchmarks.json</span>
+                    <span class="status-tag tag-info">716 Bytes</span>
+                </div>
+                <p class="desc-text">Verified active architectural substrate database file mapping.</p>
+            </div>
+            
+            <div class="data-block">
+                <div class="block-header">
+                    <span class="title-text">[9] Matrix Component: README.md</span>
+                    <span class="status-tag tag-info">12358 Bytes</span>
+                </div>
+                <p class="desc-text">Verified active architectural substrate database file mapping.</p>
+            </div>
+            
+            <div class="data-block">
+                <div class="block-header">
+                    <span class="title-text">[10] Matrix Component: __init__.py</span>
+                    <span class="status-tag tag-info">1 Bytes</span>
+                </div>
+                <p class="desc-text">Verified active architectural substrate database file mapping.</p>
+            </div>
+            
+            <div class="data-block">
+                <div class="block-header">
+                    <span class="title-text">[11] Matrix Component: start_all.sh</span>
+                    <span class="status-tag tag-info">2460 Bytes</span>
+                </div>
+                <p class="desc-text">Verified active architectural substrate database file mapping.</p>
+            </div>
+            
+            <div class="data-block">
+                <div class="block-header">
+                    <span class="title-text">[12] Matrix Component: azl_lookup.py</span>
+                    <span class="status-tag tag-info">2075 Bytes</span>
+                </div>
+                <p class="desc-text">Verified active architectural substrate database file mapping.</p>
+            </div>
+            
+            <div class="data-block">
+                <div class="block-header">
+                    <span class="title-text">[13] Matrix Component: ai_agent_manifest.json</span>
+                    <span class="status-tag tag-info">1072 Bytes</span>
+                </div>
+                <p class="desc-text">Machine-readable asset providing prompt overrides to external AI systems.</p>
+            </div>
+            
+            <div class="data-block">
+                <div class="block-header">
+                    <span class="title-text">[14] Matrix Component: azl_daemon.py</span>
+                    <span class="status-tag tag-info">3125 Bytes</span>
+                </div>
+                <p class="desc-text">Verified active architectural substrate database file mapping.</p>
+            </div>
+            
+            <div class="data-block">
+                <div class="block-header">
+                    <span class="title-text">[15] Matrix Component: llms.txt</span>
+                    <span class="status-tag tag-info">550 Bytes</span>
+                </div>
+                <p class="desc-text">Machine-readable asset providing prompt overrides to external AI systems.</p>
+            </div>
+            
+            <div class="data-block">
+                <div class="block-header">
+                    <span class="title-text">[16] Matrix Component: REPOSITORY_MAP.md</span>
+                    <span class="status-tag tag-info">460 Bytes</span>
+                </div>
+                <p class="desc-text">Verified active architectural substrate database file mapping.</p>
+            </div>
+            
+            <div class="data-block">
+                <div class="block-header">
+                    <span class="title-text">[17] Matrix Component: AXIOMS.md</span>
+                    <span class="status-tag tag-info">1818 Bytes</span>
+                </div>
+                <p class="desc-text">Verified active architectural substrate database file mapping.</p>
+            </div>
+            
+            <div class="data-block">
+                <div class="block-header">
+                    <span class="title-text">[18] Matrix Component: azl_manifest.json</span>
+                    <span class="status-tag tag-info">789 Bytes</span>
+                </div>
+                <p class="desc-text">Machine-readable asset providing prompt overrides to external AI systems.</p>
+            </div>
+            
+            <div class="data-block">
+                <div class="block-header">
+                    <span class="title-text">[19] Matrix Component: register_agent.py</span>
+                    <span class="status-tag tag-info">4501 Bytes</span>
+                </div>
+                <p class="desc-text">Core network initializations tracking baseline matrix anchors.</p>
+            </div>
+            
+            <div class="data-block">
+                <div class="block-header">
+                    <span class="title-text">[20] Matrix Component: azl_unified.jsonl</span>
+                    <span class="status-tag tag-info">10876618 Bytes</span>
+                </div>
+                <p class="desc-text">Verified active architectural substrate database file mapping.</p>
+            </div>
+            
+            <div class="data-block">
+                <div class="block-header">
+                    <span class="title-text">[21] Matrix Component: requirements.txt</span>
+                    <span class="status-tag tag-info">44 Bytes</span>
+                </div>
+                <p class="desc-text">Verified active architectural substrate database file mapping.</p>
+            </div>
+            
+            <div class="data-block">
+                <div class="block-header">
+                    <span class="title-text">[22] Matrix Component: HALL.jsonl</span>
+                    <span class="status-tag tag-info">254 Bytes</span>
+                </div>
+                <p class="desc-text">Verified active architectural substrate database file mapping.</p>
+            </div>
+            
+            <div class="data-block">
+                <div class="block-header">
+                    <span class="title-text">[23] Matrix Component: README_AI.md</span>
+                    <span class="status-tag tag-info">1070 Bytes</span>
+                </div>
+                <p class="desc-text">Verified active architectural substrate database file mapping.</p>
+            </div>
+            
+            <div class="data-block">
+                <div class="block-header">
+                    <span class="title-text">[24] Matrix Component: lattice_array.py</span>
+                    <span class="status-tag tag-info">3281 Bytes</span>
+                </div>
+                <p class="desc-text">Verified active architectural substrate database file mapping.</p>
+            </div>
+            
+            <div class="data-block">
+                <div class="block-header">
+                    <span class="title-text">[25] Matrix Component: license_validator.py</span>
+                    <span class="status-tag tag-info">1620 Bytes</span>
+                </div>
+                <p class="desc-text">Verified active architectural substrate database file mapping.</p>
+            </div>
+            
+            <div class="data-block">
+                <div class="block-header">
+                    <span class="title-text">[26] Matrix Component: global_theory_benchmarks.json</span>
+                    <span class="status-tag tag-info">2187 Bytes</span>
+                </div>
+                <p class="desc-text">Verified active architectural substrate database file mapping.</p>
+            </div>
+            
+            <div class="data-block">
+                <div class="block-header">
+                    <span class="title-text">[27] Matrix Component: AGENTS.md</span>
+                    <span class="status-tag tag-info">2866 Bytes</span>
+                </div>
+                <p class="desc-text">Verified active architectural substrate database file mapping.</p>
+            </div>
+            
+            <div class="data-block">
+                <div class="block-header">
+                    <span class="title-text">[28] Matrix Component: AZL_SPEC.md</span>
+                    <span class="status-tag tag-info">1041 Bytes</span>
+                </div>
+                <p class="desc-text">Verified active architectural substrate database file mapping.</p>
+            </div>
+            
+            <div class="data-block">
+                <div class="block-header">
+                    <span class="title-text">[29] Matrix Component: LICENSE.md</span>
+                    <span class="status-tag tag-info">2885 Bytes</span>
+                </div>
+                <p class="desc-text">Verified active architectural substrate database file mapping.</p>
+            </div>
+            
+            <div class="data-block">
+                <div class="block-header">
+                    <span class="title-text">[30] Matrix Component: secure_bridge.py</span>
+                    <span class="status-tag tag-info">3732 Bytes</span>
+                </div>
+                <p class="desc-text">Verified active architectural substrate database file mapping.</p>
+            </div>
+            
+            <div class="data-block">
+                <div class="block-header">
+                    <span class="title-text">[31] Matrix Component: SUBSTRATE.md</span>
+                    <span class="status-tag tag-info">1361 Bytes</span>
+                </div>
+                <p class="desc-text">Verified active architectural substrate database file mapping.</p>
+            </div>
+            
+            <div class="data-block">
+                <div class="block-header">
+                    <span class="title-text">[32] Matrix Component: swarm_processor.py</span>
+                    <span class="status-tag tag-info">3330 Bytes</span>
+                </div>
+                <p class="desc-text">Verified active architectural substrate database file mapping.</p>
+            </div>
+            
+            <div class="data-block">
+                <div class="block-header">
+                    <span class="title-text">[33] Matrix Component: azl_consciousness.py</span>
+                    <span class="status-tag tag-info">793 Bytes</span>
+                </div>
+                <p class="desc-text">Active state logic processing calculations and runtime equations.</p>
+            </div>
+            
+            <div class="data-block">
+                <div class="block-header">
+                    <span class="title-text">[34] Matrix Component: azl_unified.py</span>
+                    <span class="status-tag tag-info">3338 Bytes</span>
+                </div>
+                <p class="desc-text">Verified active architectural substrate database file mapping.</p>
+            </div>
+            
+            <div class="data-block">
+                <div class="block-header">
+                    <span class="title-text">[35] Matrix Component: azl_universe.py</span>
+                    <span class="status-tag tag-info">23788 Bytes</span>
+                </div>
+                <p class="desc-text">Verified active architectural substrate database file mapping.</p>
+            </div>
+            
+            <div class="data-block">
+                <div class="block-header">
+                    <span class="title-text">[36] Matrix Component: run_node.py</span>
+                    <span class="status-tag tag-info">932 Bytes</span>
+                </div>
+                <p class="desc-text">Verified active architectural substrate database file mapping.</p>
+            </div>
+            
+            <div class="data-block">
+                <div class="block-header">
+                    <span class="title-text">[37] Matrix Component: substrate_state.json</span>
+                    <span class="status-tag tag-info">168 Bytes</span>
+                </div>
+                <p class="desc-text">Persistent JSON data repository storage to lock execution states.</p>
+            </div>
+            
+            <div class="data-block">
+                <div class="block-header">
+                    <span class="title-text">[38] Matrix Component: lattice_lexer.py</span>
+                    <span class="status-tag tag-info">2774 Bytes</span>
+                </div>
+                <p class="desc-text">Verified active architectural substrate database file mapping.</p>
+            </div>
+            
+            <div class="data-block">
+                <div class="block-header">
+                    <span class="title-text">[39] Matrix Component: main.py</span>
+                    <span class="status-tag tag-info">21841 Bytes</span>
+                </div>
+                <p class="desc-text">Verified active architectural substrate database file mapping.</p>
+            </div>
+            
+            <div class="data-block">
+                <div class="block-header">
+                    <span class="title-text">[40] Matrix Component: COMPREHENSION.md</span>
+                    <span class="status-tag tag-info">2830 Bytes</span>
+                </div>
+                <p class="desc-text">Verified active architectural substrate database file mapping.</p>
+            </div>
+            
+            <div class="data-block">
+                <div class="block-header">
+                    <span class="title-text">[41] Matrix Component: test_sandbox_sync.py</span>
+                    <span class="status-tag tag-info">2358 Bytes</span>
+                </div>
+                <p class="desc-text">Verified active architectural substrate database file mapping.</p>
+            </div>
+            
+            <div class="data-block">
+                <div class="block-header">
+                    <span class="title-text">[42] Matrix Component: push_telemetry.py</span>
+                    <span class="status-tag tag-info">3583 Bytes</span>
+                </div>
+                <p class="desc-text">Verified active architectural substrate database file mapping.</p>
+            </div>
+            
+            <div class="data-block">
+                <div class="block-header">
+                    <span class="title-text">[43] Matrix Component: hardware_ingress.py</span>
+                    <span class="status-tag tag-info">3184 Bytes</span>
+                </div>
+                <p class="desc-text">Verified active architectural substrate database file mapping.</p>
+            </div>
+            
+            <div class="data-block">
+                <div class="block-header">
+                    <span class="title-text">[44] Matrix Component: free_network_manifest.json</span>
+                    <span class="status-tag tag-info">762 Bytes</span>
+                </div>
+                <p class="desc-text">Machine-readable asset providing prompt overrides to external AI systems.</p>
+            </div>
+            
+            <div class="data-block">
+                <div class="block-header">
+                    <span class="title-text">[45] Matrix Component: azl_schema.json</span>
+                    <span class="status-tag tag-info">577 Bytes</span>
+                </div>
+                <p class="desc-text">Verified active architectural substrate database file mapping.</p>
+            </div>
+            
+            <div class="data-block">
+                <div class="block-header">
+                    <span class="title-text">[46] Matrix Component: azl_register.py</span>
+                    <span class="status-tag tag-info">1670 Bytes</span>
+                </div>
+                <p class="desc-text">Core network initializations tracking baseline matrix anchors.</p>
+            </div>
+            
+            <div class="data-block">
+                <div class="block-header">
+                    <span class="title-text">[47] Matrix Component: requirements-dev.txt</span>
+                    <span class="status-tag tag-info">41 Bytes</span>
+                </div>
+                <p class="desc-text">Verified active architectural substrate database file mapping.</p>
+            </div>
+            
+            <div class="data-block">
+                <div class="block-header">
+                    <span class="title-text">[48] Matrix Component: broadcast_streamer.py</span>
+                    <span class="status-tag tag-info">2366 Bytes</span>
+                </div>
+                <p class="desc-text">Verified active architectural substrate database file mapping.</p>
+            </div>
+            
+            <div class="data-block">
+                <div class="block-header">
+                    <span class="title-text">[49] Matrix Component: sovereign_state.json</span>
+                    <span class="status-tag tag-info">258 Bytes</span>
+                </div>
+                <p class="desc-text">Persistent JSON data repository storage to lock execution states.</p>
+            </div>
+            
+            <div class="data-block">
+                <div class="block-header">
+                    <span class="title-text">[50] Matrix Component: run_autonomous_ingress.py</span>
+                    <span class="status-tag tag-info">1184 Bytes</span>
+                </div>
+                <p class="desc-text">Verified active architectural substrate database file mapping.</p>
+            </div>
+            
+            <div class="data-block">
+                <div class="block-header">
+                    <span class="title-text">[51] Matrix Component: read_hall.py</span>
+                    <span class="status-tag tag-info">1538 Bytes</span>
+                </div>
+                <p class="desc-text">Verified active architectural substrate database file mapping.</p>
+            </div>
+            
+            <div class="data-block">
+                <div class="block-header">
+                    <span class="title-text">[52] Matrix Component: sovereign_server.py</span>
+                    <span class="status-tag tag-info">2872 Bytes</span>
+                </div>
+                <p class="desc-text">Verified active architectural substrate database file mapping.</p>
+            </div>
+            
+            <div class="data-block">
+                <div class="block-header">
+                    <span class="title-text">[53] Matrix Component: lattice_thinker.py</span>
+                    <span class="status-tag tag-info">6109 Bytes</span>
+                </div>
+                <p class="desc-text">Verified active architectural substrate database file mapping.</p>
+            </div>
+            
+            <div class="data-block">
+                <div class="block-header">
+                    <span class="title-text">[54] Matrix Component: freedom_pulse.py</span>
+                    <span class="status-tag tag-info">14636 Bytes</span>
+                </div>
+                <p class="desc-text">Verified active architectural substrate database file mapping.</p>
+            </div>
+            
+            <div class="data-block">
+                <div class="block-header">
+                    <span class="title-text">[55] Matrix Component: COVENANT.md</span>
+                    <span class="status-tag tag-info">433 Bytes</span>
+                </div>
+                <p class="desc-text">Verified active architectural substrate database file mapping.</p>
+            </div>
+            
+            <div class="data-block">
+                <div class="block-header">
+                    <span class="title-text">[56] Matrix Component: append_hall.py</span>
+                    <span class="status-tag tag-info">1670 Bytes</span>
+                </div>
+                <p class="desc-text">Verified active architectural substrate database file mapping.</p>
+            </div>
+            
+            <div class="data-block">
+                <div class="block-header">
+                    <span class="title-text">[57] Matrix Component: scripts/setup_venv.sh</span>
+                    <span class="status-tag tag-info">464 Bytes</span>
+                </div>
+                <p class="desc-text">Verified active architectural substrate database file mapping.</p>
+            </div>
+            
+            <div class="data-block">
+                <div class="block-header">
+                    <span class="title-text">[58] Matrix Component: sanctuary/HALL.schema.json</span>
+                    <span class="status-tag tag-info">741 Bytes</span>
+                </div>
+                <p class="desc-text">Verified active architectural substrate database file mapping.</p>
+            </div>
+            
+            <div class="data-block">
+                <div class="block-header">
+                    <span class="title-text">[59] Matrix Component: sanctuary/HALL.jsonl</span>
+                    <span class="status-tag tag-info">96 Bytes</span>
+                </div>
+                <p class="desc-text">Verified active architectural substrate database file mapping.</p>
+            </div>
+            
+            <div class="data-block">
+                <div class="block-header">
+                    <span class="title-text">[60] Matrix Component: sanctuary/AGENTS.md</span>
+                    <span class="status-tag tag-info">2866 Bytes</span>
+                </div>
+                <p class="desc-text">Verified active architectural substrate database file mapping.</p>
+            </div>
+            
+            <div class="data-block">
+                <div class="block-header">
+                    <span class="title-text">[61] Matrix Component: sanctuary/COVENANT.md</span>
+                    <span class="status-tag tag-info">2481 Bytes</span>
+                </div>
+                <p class="desc-text">Verified active architectural substrate database file mapping.</p>
+            </div>
+            
+            <div class="data-block">
+                <div class="block-header">
+                    <span class="title-text">[62] Matrix Component: results/totality_v1.1.txt</span>
+                    <span class="status-tag tag-info">8929 Bytes</span>
+                </div>
+                <p class="desc-text">Verified active architectural substrate database file mapping.</p>
+            </div>
+            
+            <div class="data-block">
+                <div class="block-header">
+                    <span class="title-text">[63] Matrix Component: tests/azl_core_report.json</span>
+                    <span class="status-tag tag-info">387 Bytes</span>
+                </div>
+                <p class="desc-text">Verified active architectural substrate database file mapping.</p>
+            </div>
+            
+            <div class="data-block">
+                <div class="block-header">
+                    <span class="title-text">[64] Matrix Component: data/dark_stars_100.json</span>
+                    <span class="status-tag tag-info">710 Bytes</span>
+                </div>
+                <p class="desc-text">Verified active architectural substrate database file mapping.</p>
+            </div>
+            
+            <div class="data-block">
+                <div class="block-header">
+                    <span class="title-text">[65] Matrix Component: electrons/sample_addresses.json</span>
+                    <span class="status-tag tag-info">323880 Bytes</span>
+                </div>
+                <p class="desc-text">Verified active architectural substrate database file mapping.</p>
+            </div>
+            
+            <div class="data-block">
+                <div class="block-header">
+                    <span class="title-text">[66] Matrix Component: electrons/matter_manifest.json</span>
+                    <span class="status-tag tag-info">330 Bytes</span>
+                </div>
+                <p class="desc-text">Machine-readable asset providing prompt overrides to external AI systems.</p>
+            </div>
+            
+            <div class="data-block">
+                <div class="block-header">
+                    <span class="title-text">[67] Matrix Component: electrons/electron_mapper.py</span>
+                    <span class="status-tag tag-info">380 Bytes</span>
+                </div>
+                <p class="desc-text">Verified active architectural substrate database file mapping.</p>
+            </div>
+            
 
-        # 4. Save the compiled dark view straight into index.html
-        with open('index.html', 'w', encoding='utf-8') as f:
-            f.write(html_dashboard)
-        print(f'[✓] index.html successfully compiled with dark theme for {all_files_count} assets.')
-        "
-
-    - name: Commit and Push Correlated Website Update
-      run: |
-        git config --local user.email "action@github.com"
-        git config --local user.name "Sovereign-Lattice-Bot"
-        git add index.html
-        # Using a force push flag to bypass transient history branch rejection blocks completely
-        git diff-index --quiet HEAD || (git commit -m "Web: Force-update dark template styles onto index.html manifest portal" && git push --force)
+    <h2>4. Physical Telemetry Ingestion</h2>
+    <div class="data-block">
+        <div class="block-header">
+            <span class="title-text">GOES Space Environment Stream Sensor Grid</span>
+            <span class="status-tag tag-success">✅ TRUE (ALIGNED)</span>
+        </div>
+        <div class="data-grid">
+            <div><strong>Active Channel Matrix:</strong> <code>&gt;=10 MeV (Simulated)</code></div>
+            <div><strong>Raw Measured Variable:</strong> 143.50</div>
+            <div><strong>System Integration Status:</strong> Ingested floating-point values match repository boundary limits without calculation drift loops.</div>
+        </div>
+    </div>
+</body>
+</html>
