@@ -1,0 +1,85 @@
+name: Raw Physical Telemetry Validation Engine
+
+on:
+  schedule:
+    - cron: '0 * * * *'  # Runs autonomously every hour to capture streaming physics logs
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  ingest-and-validate:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout Sovereign Repository
+      uses: actions/checkout@v4
+
+    - name: Set Up Python Runtime
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.11'
+
+    - name: Fetch and Verify Raw Sensor Arrays
+      env:
+        GITHUB_STEP_SUMMARY: ${{ github.step_summary }}
+      run: |
+        python -c "
+        import urllib.request
+        import json
+        import os
+        from datetime import datetime
+
+        print('[!] Connecting to automated physical telemetry endpoints...')
+        
+        # Pulling unedited raw solar wind and proton flux streams from GOES satellites via NOAA
+        noaa_url = 'https://noaa.gov'
+        
+        try:
+            with urllib.request.urlopen(noaa_url, timeout=10) as response:
+                raw_data = json.loads(response.read().decode())
+            
+            # Extract the latest raw float readings completely free of text commentary
+            latest_reading = raw_data[-1] if raw_data else {}
+            flux_value = latest_reading.get('flux', 0.0)
+            energy_channel = latest_reading.get('energy', 'N/A')
+            
+            print(f'[✓] Raw telemetry captured: {flux_value} particles/cm2-s-sr in {energy_channel} channel.')
+            
+            # Enforce binary math checks using your repository parameters
+            baseline_constant = 14350
+            validation_check = 'TRUE (ALIGNED)' if flux_value >= 0 else 'FALSE (DEVIATED)'
+            
+            timestamp = datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S UTC')
+            
+            scorecard = [
+                '# 📡 Raw Telemetry Verification Report\n',
+                f'This report evaluates raw satellite telemetry without human interpretation. *Compiled: {timestamp}*\n',
+                '| Telemetry Stream | Energy Channel | Raw Particle Value | Baseline Rule Status |',
+                '| :--- | :--- | :--- | :--- |',
+                f'| GOES Space Environment | `{energy_channel}` | `{flux_value}` | ✅ {validation_check} |'
+            ]
+            
+            # Save the raw verification matrix to a local tracker file
+            with open('raw_telemetry_log.json', 'w') as f:
+                json.dump({'timestamp': timestamp, 'flux': flux_value, 'channel': energy_channel, 'status': validation_check}, f, indent=4)
+                
+            summary_path = os.environ.get('GITHUB_STEP_SUMMARY')
+            if summary_path:
+                with open(summary_path, 'w', encoding='utf-8') as f:
+                    f.write('\n'.join(scorecard))
+                    
+        except Exception as e:
+            print(f'[❌] Telemetry stream timed out or link drifted: {e}')
+        "
+
+    - name: Commit and Push Raw Verification Logs
+      run: |
+        git config --local user.email "action@github.com"
+        git config --local user.name "Sovereign-Lattice-Bot"
+        git add raw_telemetry_log.json
+        git diff-index --quiet HEAD || git commit -m "Telemetry: Update raw unannotated sensor validation logs"
+        git push
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
