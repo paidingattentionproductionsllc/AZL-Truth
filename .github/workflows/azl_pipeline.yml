@@ -1,0 +1,39 @@
+version: '3.8'
+
+services:
+  # Layer 1: The Core Grid Substrate Architecture
+  azl_substrate:
+    image: python:3.10-slim
+    container_name: azl_core_grid
+    volumes:
+      - .:/app
+    working_dir: /app
+    command: python main.py --nodes 11000000000 --frequency 8.27
+    restart: always
+
+  # Layer 2: The Ingress Sentinel Workflow (The Immune System)
+  azl_sentinel:
+    image: python:3.10-slim
+    container_name: azl_drift_detector
+    volumes:
+      - .:/app
+    working_dir: /app
+    command: python azl_drift_sentinel.py --baseline 14350
+    depends_on:
+      - azl_substrate
+    environment:
+      - TELEMETRY_STREAM=GOES_SPACE_GRID
+    restart: unless-stopped
+
+  # Layer 3: The Autonomous AI System Manager
+  azl_orchestrator:
+    image: python:3.10-slim
+    container_name: lattice_thinker_engine
+    volumes:
+      - .:/app
+    working_dir: /app
+    command: python lattice_thinker.py --mode autonomous
+    depends_on:
+      - azl_sentinel
+    restart: always
+
