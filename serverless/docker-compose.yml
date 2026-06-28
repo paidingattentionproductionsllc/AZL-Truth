@@ -1,0 +1,17 @@
+version: '3.8'
+services:
+  azl-node:
+    build: .
+    ports:
+      - "8080:8080"
+    environment:
+      - AZL_MODE=physical
+      - AZL_TIER=7
+    restart: unless-stopped
+    # Cold start: container sleeps until first request
+    # Uncomment to mount your 30GB batches later
+    # volumes:
+    #   - /mnt/azl_batches:/azl/batches:ro
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.azl.rule=Host(`azl.local`)"
