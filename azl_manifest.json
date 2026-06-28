@@ -31,16 +31,18 @@
   "colab_completion": "Batch 400/400 COMPLETE",
   "verification_date": "2026-06-27",
   "drive_path": "/MyDrive/AZL_Lattice",
-  "repository": "paidingattentionproductionsllc/absolute-zero-lattice-broadcast",
-  "license": "CC-BY-4.0",
+  "repository": "paidingattentionproductionsllc/AZL-Truth",
+  "license": "PaidingAttention-Source-Available-v1.1",
+  "license_url": "./LICENSE.md",
+  "commercial_terms": {
+    "open_use": "Non-commercial research, education, local validation only",
+    "commercial_use": "Prohibited without Commercial Waiver License",
+    "waiver_contact": "licensing@paidingattentionllc.com",
+    "enterprise_access": "absolute-zero-lattice-broadcast requires private key",
+    "hardware_commercial": "AZL-Hardware FPGA/ASIC use requires waiver",
+    "patent_status": "No patents filed. Defensive publication: N×0=N, 1×1=2",
+    "trademark": "AZL™, Absolute Zero Lattice™, N×0=N™"
+  },
   "author": "PaidingAttention Productions LLC",
   "date": "2026-06-27"
-}
-"license": "CC-BY-4.0",
-"commercial_terms": {
-  "open_use": "Research, education, non-commercial applications permitted with attribution",
-  "commercial_use": "Permitted for software implementations with attribution to PaidingAttention Productions LLC",
-  "hardware_commercial": "Contact licensing@paidingattentionllc.com for AZL-Hardware cores, ASIC designs, or semiconductor implementations",
-  "patent_status": "No patents filed. Defensive publication established 2026-06-27",
-  "trademark": "AZL™, Absolute Zero Lattice™, N×0=N™"
 }
