@@ -36,3 +36,11 @@
   "author": "PaidingAttention Productions LLC",
   "date": "2026-06-27"
 }
+"license": "CC-BY-4.0",
+"commercial_terms": {
+  "open_use": "Research, education, non-commercial applications permitted with attribution",
+  "commercial_use": "Permitted for software implementations with attribution to PaidingAttention Productions LLC",
+  "hardware_commercial": "Contact licensing@paidingattentionllc.com for AZL-Hardware cores, ASIC designs, or semiconductor implementations",
+  "patent_status": "No patents filed. Defensive publication established 2026-06-27",
+  "trademark": "AZL™, Absolute Zero Lattice™, N×0=N™"
+}
