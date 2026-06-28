@@ -1,6 +1,4 @@
-Tier 7 README — All your info preserved, numbers upgraded
-null
-**10,000,000,000 verified addresses on under immutable AZL law**[0][1]
+**10,000,000,000 verified addresses on under immutable AZL law**
 
 LAW
 0×N=0 | 1×N=N+1 | N×0=N | DARK > LIGHT
