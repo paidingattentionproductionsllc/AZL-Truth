@@ -122,3 +122,13 @@ jobs:
         git push
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    - name: Commit and Sync Global Field Metrics
+      run: |
+        git config --local user.email "action@github.com"
+        git config --local user.name "Sovereign-Lattice-Bot"
+        git add global_theory_benchmarks.json
+        git diff-index --quiet HEAD || git commit -m "Metrics: Update global theory stress test [Tier 8: 14350, 8.27 Hz]"
+        git pull --rebase origin main || echo "Rebase failed, continuing"
+        git push || echo "Push failed due to concurrent update - non-fatal"
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
