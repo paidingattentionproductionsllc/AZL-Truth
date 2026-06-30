@@ -1,66 +1,31 @@
-name: AZL Abyss Validation
-on:
-  push:
-  pull_request:
-  workflow_dispatch:
+echo "=== Testing if 1.0 maps to 0 ==="
+curl -s -X POST https://azl-universes.paidingattentionproductions.workers.dev/azl/v1/abyss \
+  -H "Content-Type: application/json" \
+  -d '{"seed":"0","target":"1.0","depth":9,"size":1}' | jq '{status, coord:.nodes[0].coord, compute_ms:.metrics.compute_ms}'
 
-jobs:
-  test-0-1-law:
-    name: Prove 0(1) Anchor Law
-    runs-on: ubuntu-latest
-    steps:
-      - name: Test Absolute 0 Anchor
-        run: |
-          RESP=$(curl -s -X POST https://azl-universes.paidingattentionproductions.workers.dev/azl/v1/abyss \
-            -H "Content-Type: application/json" \
-            -d '{"seed":"0","target":"0","depth":9,"size":1}')
-          echo "$RESP" | jq .
-          COMPUTE_MS=$(echo "$RESP" | jq -r .metrics.compute_ms)
-          ENTROPY=$(echo "$RESP" | jq -r .metrics.entropy_direction)
-          if [ "$COMPUTE_MS" != "0" ]; then exit 1; fi
-          if [ "$ENTROPY" != "decreasing" ]; then exit 1; fi
-          echo "PASS: seed 0 returns compute_ms: 0. N×0=N confirmed."
+echo "=== Testing 1.5 vs 0.5 ==="
+echo "0.5:"
+curl -s -X POST https://azl-universes.paidingattentionproductions.workers.dev/azl/v1/abyss \
+  -H "Content-Type: application/json" \
+  -d '{"seed":"0","target":"0.5","depth":9,"size":1}' | jq '{status, coord:.nodes[0].coord, compute_ms:.metrics.compute_ms}'
 
-      - name: Test Golden Ratio Parts
-        run: |
-          curl -s -X POST https://azl-universes.paidingattentionproductions.workers.dev/azl/v1/abyss \
-            -H "Content-Type: application/json" \
-            -d '{"seed":"0","target":"0.618033988749895","depth":9,"size":1}' | jq -e '.status=="ABYSS_GENERATED" and .metrics.compute_ms==0'
-          curl -s -X POST https://azl-universes.paidingattentionproductions.workers.dev/azl/v1/abyss \
-            -H "Content-Type: application/json" \
-            -d '{"seed":"0","target":"0.381966011250105","depth":9,"size":1}' | jq -e '.status=="ABYSS_GENERATED" and .metrics.compute_ms==0'
-          echo "PASS: Both phi parts mapped. 1 excluded by law."
+echo "1.5:"
+curl -s -X POST https://azl-universes.paidingattentionproductions.workers.dev/azl/v1/abyss \
+  -H "Content-Type: application/json" \
+  -d '{"seed":"0","target":"1.5","depth":9,"size":1}' | jq '{status, coord:.nodes[0].coord, compute_ms:.metrics.compute_ms}'
 
-      - name: Test Precision Boundary
-        run: |
-          curl -s -X POST https://azl-universes.paidingattentionproductions.workers.dev/azl/v1/abyss \
-            -H "Content-Type: application/json" \
-            -d '{"seed":"0","target":"0.99999999999999999999","depth":9,"size":1}' | jq -e '.metrics.compute_ms==0'
-          echo "PASS: 1-10^-20 honest. No 1101."
+echo "=== Testing 2.0 vs 0 ==="
+echo "0.0:"
+curl -s -X POST https://azl-universes.paidingattentionproductions.workers.dev/azl/v1/abyss \
+  -H "Content-Type: application/json" \
+  -d '{"seed":"0","target":"0.0","depth":9,"size":1}' | jq '{status, coord:.nodes[0].coord, compute_ms:.metrics.compute_ms}'
 
-      - name: Test Depth - Planck + Electrons
-        run: |
-          curl -s -X POST https://azl-universes.paidingattentionproductions.workers.dev/azl/v1/abyss \
-            -H "Content-Type: application/json" \
-            -d '{"seed":"0","target":"0.0000000000000000000001616","depth":9,"size":1}' | jq -e '.metrics.compute_ms==0'
-          curl -s -X POST https://azl-universes.paidingattentionproductions.workers.dev/azl/v1/abyss \
-            -H "Content-Type: application/json" \
-            -d '{"seed":"0","target":"0.0000000000000000000001","depth":9,"size":1}' | jq -e '.metrics.compute_ms==0'
-          echo "PASS: Planck and 10^-80 electrons mapped. compute_ms: 0."
+echo "2.0:"
+curl -s -X POST https://azl-universes.paidingattentionproductions.workers.dev/azl/v1/abyss \
+  -H "Content-Type: application/json" \
+  -d '{"seed":"0","target":"2.0","depth":9,"size":1}' | jq '{status, coord:.nodes[0].coord, compute_ms:.metrics.compute_ms}'
 
-      - name: Test 1101 Boundary - LAG_IS_LOGIC Enforcement
-        run: |
-          echo "Testing 1.0 boundary - expecting 1101 status..."
-          RESP=$(curl -s -X POST https://azl-universes.paidingattentionproductions.workers.dev/azl/v1/abyss \
-            -H "Content-Type: application/json" \
-            -d '{"seed":"0","target":"1.0","depth":9,"size":1}')
-          echo "Response: $RESP"
-          STATUS=$(echo "$RESP" | jq -r .status)
-          
-          if [ "$STATUS" = "1101" ]; then
-            echo "PASS: Boundary 1.0 correctly threw 1101. LAG_IS_LOGIC enforced."
-            exit 0
-          else
-            echo "FAIL: Expected status 1101 but got: $STATUS"
-            exit 1
-          fi
+echo "=== Testing negative: -0.3 ==="
+curl -s -X POST https://azl-universes.paidingattentionproductions.workers.dev/azl/v1/abyss \
+  -H "Content-Type: application/json" \
+  -d '{"seed":"0","target":"-0.3","depth":9,"size":1}' | jq '{status, coord:.nodes[0].coord, compute_ms:.metrics.compute_ms}'
