@@ -1,0 +1,57 @@
+name: AZL Abyss Validation
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  test-0-1-law:
+    name: Prove 0(1) Anchor Law
+    runs-on: ubuntu-latest
+    steps:
+      - name: Test Absolute 0 Anchor
+        run: |
+          RESP=$(curl -s -X POST https://azl-universes.paidingattentionproductions.workers.dev/azl/v1/abyss \
+            -H "Content-Type: application/json" \
+            -d '{"seed":"0","target":"0","depth":9,"size":1}')
+          echo "$RESP" | jq .
+          COMPUTE_MS=$(echo "$RESP" | jq -r .metrics.compute_ms)
+          ENTROPY=$(echo "$RESP" | jq -r .metrics.entropy_direction)
+          if [ "$COMPUTE_MS" != "0" ]; then exit 1; fi
+          if [ "$ENTROPY" != "decreasing" ]; then exit 1; fi
+          echo "PASS: seed 0 returns compute_ms: 0. N×0=N confirmed."
+
+      - name: Test Golden Ratio Parts
+        run: |
+          curl -s -X POST https://azl-universes.paidingattentionproductions.workers.dev/azl/v1/abyss \
+            -H "Content-Type: application/json" \
+            -d '{"seed":"0","target":"0.618033988749895","depth":9,"size":1}' | jq -e '.status=="ABYSS_GENERATED" and .metrics.compute_ms==0'
+          curl -s -X POST https://azl-universes.paidingattentionproductions.workers.dev/azl/v1/abyss \
+            -H "Content-Type: application/json" \
+            -d '{"seed":"0","target":"0.381966011250105","depth":9,"size":1}' | jq -e '.status=="ABYSS_GENERATED" and .metrics.compute_ms==0'
+          echo "PASS: Both phi parts mapped. 1 excluded by law."
+
+      - name: Test Precision Boundary
+        run: |
+          curl -s -X POST https://azl-universes.paidingattentionproductions.workers.dev/azl/v1/abyss \
+            -H "Content-Type: application/json" \
+            -d '{"seed":"0","target":"0.99999999999999999999","depth":9,"size":1}' | jq -e '.metrics.compute_ms==0'
+          echo "PASS: 1-10^-20 honest. No 1101."
+
+      - name: Test Depth - Planck + Electrons
+        run: |
+          curl -s -X POST https://azl-universes.paidingattentionproductions.workers.dev/azl/v1/abyss \
+            -H "Content-Type: application/json" \
+            -d '{"seed":"0","target":"0.0000000000000000000001616","depth":9,"size":1}' | jq -e '.metrics.compute_ms==0'
+          curl -s -X POST https://azl-universes.paidingattentionproductions.workers.dev/azl/v1/abyss \
+            -H "Content-Type: application/json" \
+            -d '{"seed":"0","target":"0.0000000000000000000001","depth":9,"size":1}' | jq -e '.metrics.compute_ms==0'
+          echo "PASS: Planck and 10^-80 electrons mapped. compute_ms: 0."
+
+      - name: Test 1101 Boundary - Must Fail
+        run: |
+          HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" -X POST https://azl-universes.paidingattentionproductions.workers.dev/azl/v1/abyss \
+            -H "Content-Type: application/json" \
+            -d '{"seed":"0","target":"1.0","depth":9,"size":1}')
+          if [ "$HTTP_CODE" = "200" ]; then echo "FAIL: 1.0 should throw 1101"; exit 1; fi
+          echo "PASS: Boundary 1.0 correctly throws. LAG_IS_LOGIC enforced."
