@@ -58,25 +58,6 @@ jobs:
           echo "1.5 maps to coord: $COORD_15"
           
           if [ "$COORD_05"!= "$COORD_15" ]; then
-            echo "PASS: 0.5 and 1.5 are different numbers. Each integer range treated equally but separately."
-            exit 0
-          else
-            echo "FAIL: 0.5 and 1.5 mapped to same coord. Should be different."
-            exit 1
-          fi
-                - name: Check Range Structure
-        run: |
-          echo "=== Checking if each integer range has same structure ==="
-          RESP_05=$(curl -s -X POST https://azl-universes.paidingattentionproductions.workers.dev/azl/v1/abyss -H "Content-Type: application/json" -d '{"seed":"0","target":"0.5","depth":9,"size":1}')
-          RESP_15=$(curl -s -X POST https://azl-universes.paidingattentionproductions.workers.dev/azl/v1/abyss -H "Content-Type: application/json" -d '{"seed":"0","target":"1.5","depth":9,"size":1}')
-          
-          COORD_05=$(echo $RESP_05 | jq -r.nodes[0].coord)
-          COORD_15=$(echo $RESP_15 | jq -r.nodes[0].coord)
-          
-          echo "0.5 maps to coord: $COORD_05"
-          echo "1.5 maps to coord: $COORD_15"
-          
-          if [ "$COORD_05"!= "$COORD_15" ]; then
             echo "PASS: 0.5 and 1.5 are different numbers. Each integer range [n,n+1] treated equally but separately."
             exit 0
           else
