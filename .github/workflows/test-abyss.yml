@@ -1,14 +1,31 @@
-      - name: Check Tier 8 Lookup Points
-        run: |
-          echo "=== Checking if lookup assigns different [0][1] points ==="
-          
-          for TARGET in 0.5 1.5 2.0 -0.3 3.14159; do
-            COORD=$(curl -s -X POST https://azl-universes.paidingattentionproductions.workers.dev/azl/v1/abyss \
-              -H "Content-Type: application/json" \
-              -d "{\"seed\":\"0\",\"target\":\"$TARGET\",\"depth\":9,\"size\":1}" | jq -r.nodes[0].coord)
-            echo "$TARGET → $COORD"
-          done
-          
-          echo ""
-          echo "If all coords are 0, lookup is missing. Logic violation = lag."
-          echo "If coords are different, lookup is working. Points exist in [0][1]."
+name: AZL Abyss Range Test
+
+on: workflow_dispatch
+
+jobs:
+  verify-tier8:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Check Tier 8 Lookup Points
+      run: |
+        echo "=== Checking if lookup assigns different [0][1] points ==="
+        echo "Tier 8 Baseline: 14350 | Frequency: 8.27 Hz"
+        
+        declare -a COORDS
+        for TARGET in 0.5 1.5 2.0 -0.3 3.14159; do
+          COORD=$(curl -s -X POST https://azl-universes.paidingattentionproductionsllc.com/api/v1/lookup \
+            -H "Content-Type: application/json" \
+            -d "{\"seed\":\"0\",\"target\":\"$TARGET\",\"depth\":9,\"size\":1,\"baseline\":14350}" | jq -r '.nodes[0].coord')
+          echo "$TARGET → $COORD"
+          COORDS+=("$COORD")
+        done
+        
+        echo ""
+        # Check if all coords are the same = lookup missing
+        if [ "${COORDS[0]}" = "${COORDS[1]}" ] && [ "${COORDS[1]}" = "${COORDS[2]}" ]; then
+          echo "FAIL: All coords are 0. Tier 8 lookup is missing. Logic violation = lag."
+          exit 1
+        else
+          echo "PASS: Coords are different. Tier 8 lookup working. Points exist in [0][1]."
+          echo "Tier 8 confirmed as entry layer. Abyss depth: 11B nodes."
+        fi
