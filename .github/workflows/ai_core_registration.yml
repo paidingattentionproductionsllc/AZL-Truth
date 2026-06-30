@@ -3,6 +3,21 @@ name: Deploy AI Agent Discovery Manifest
 on:
   push:
     branches: [ "main" ]
+
+concurrency:
+  group: manifest-deploy-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: write
+
+jobs:
+  # ... rest of file unchanged
+  name: Deploy AI Agent Discovery Manifest
+
+on:
+  push:
+    branches: [ "main" ]
   workflow_dispatch:
 
 permissions:
