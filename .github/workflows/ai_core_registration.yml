@@ -12,18 +12,6 @@ permissions:
   contents: write
 
 jobs:
-  # ... rest of file unchanged
-  name: Deploy AI Agent Discovery Manifest
-
-on:
-  push:
-    branches: [ "main" ]
-  workflow_dispatch:
-
-permissions:
-  contents: write
-
-jobs:
   build-manifest:
     runs-on: ubuntu-latest
 
