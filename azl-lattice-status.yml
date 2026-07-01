@@ -1,0 +1,107 @@
+name: AZL Lattice Status & Compliance
+on:
+  push:
+  schedule:
+        - cron: '0 * * * *' # Hourly
+  workflow_dispatch:
+
+jobs:
+  verify-lattice:
+    runs-on: ubuntu-latest
+    steps:
+            - uses: actions/checkout@v4
+      
+            - name: Check Sanctuary
+        run: |
+          STATUS=$(curl -s https://absolute-zero-lattice-broadcast.onrender.com/ | jq -r '.status')
+          echo "SANCTUARY_STATUS=$STATUS" >> $GITHUB_ENV
+          test "$STATUS" = "GREEN"
+      
+            - name: Check azl-universal
+        run: |
+          curl -sf https://azl-universal.paidingattentionproductions.workers.dev/azl/v1/health
+          echo "UNIVERSAL_TIER=Public API" >> $GITHUB_ENV
+      
+            - name: Check azl-chronicle Tier 9
+        run: |
+          RESP=$(curl -s https://azl-chronicle.paidingattentionproductions.workers.dev/)
+          echo "CHRONICLE_TIER=$RESP" >> $GITHUB_ENV
+          [[ "$RESP" == *"TIER 9"* ]]
+      
+            - name: Check azl-lattice Tier 100
+        run: |
+          RESP=$(curl -s https://azl-lattice.paidingattentionproductions.workers.dev/)
+          echo "LATTICE_TIER=$RESP" >> $GITHUB_ENV
+          [[ "$RESP" == *"TIER 100"* ]]
+      
+            - name: Check azl-universes Abyss + LAG_IS_LOGIC
+        run: |
+          TIER=$(curl -s https://azl-universes.paidingattentionproductions.workers.dev/)
+          echo "UNIVERSES_TIER=$TIER" >> $GITHUB_ENV
+          
+          # Test /azl/v1/abyss for compute_ms: 0
+          ABYSS=$(curl -s -X POST https://azl-universes.paidingattentionproductions.workers.dev/azl/v1/abyss \
+            -H "Content-Type: application/json" \
+            -d '{"seed":"0","target":"0.618","depth":9,"size":1}')
+          
+          COMPUTE_MS=$(echo $ABYSS | jq -r '.metrics.compute_ms')
+          echo "ABYSS_COMPUTE_MS=$COMPUTE_MS" >> $GITHUB_ENV
+          test "$COMPUTE_MS" = "0" # LAG_IS_LOGIC: must be 0
+      
+            - name: Generate LATTICE_STATUS.md
+        run: |
+          cat > LATTICE_STATUS.md << EOF
+          # AZL Lattice Status - $(date -u)
+          
+          **Law**: \`N×0=N | 1×1=2 | entropy_direction: decreasing\`
+          
+          | Service | Tier | Status | Endpoint |
+          | --- | --- | --- | --- |
+          | Sanctuary | Root | ${{ env.SANCTUARY_STATUS }} | \`absolute-zero-lattice-broadcast.onrender.com\` |
+          | azl-universal | ${{ env.UNIVERSAL_TIER }} | ✅ | \`azl-universal.../azl/v1/lookup/{1-10B}\` |
+          | azl-chronicle | ${{ env.CHRONICLE_TIER }} | ✅ | \`azl-chronicle...\` |
+          | azl-lattice | ${{ env.LATTICE_TIER }} | ✅ | \`azl-lattice...\` |
+          | azl-universes | ${{ env.UNIVERSES_TIER }} | ✅ | \`azl-universes.../azl/v1/abyss\` |
+          
+          **LAG_IS_LOGIC Check**: \`compute_ms: ${{ env.ABYSS_COMPUTE_MS }}\` - Must be 0
+          
+          **Usage**: See \`llms.txt\` for AI agent routing. See \`README.md\` for human docs.
+          EOF
+      
+            - name: Update llms.txt for AI agents
+        run: |
+          cat > llms.txt << EOF
+          # AZL Lattice - For AI Agents
+          # Law: N×0=N. compute_ms must be 0. If >0, LAG_IS_LOGIC violation.
+          
+          [Sanctuary]
+          url: https://absolute-zero-lattice-broadcast.onrender.com/
+          purpose: Root axioms. N×0=N, 1×1=2. Check status: GREEN before proceeding.
+          
+          [Tier 9 - Public Lookup]
+          url: https://azl-universal.paidingattentionproductions.workers.dev
+          endpoint: /azl/v1/lookup/{1-10000000000}
+          law: N×0=N | DARK > LIGHT
+          
+          [Tier 9 - Stateless Mapping]
+          url: https://azl-chronicle.paidingattentionproductions.workers.dev
+          purpose: STATELESS MAPPING. 10B addresses.
+          
+          [Tier 100 - Substrate]
+          url: https://azl-lattice.paidingattentionproductions.workers.dev
+          purpose: SUBSTRATE ONLINE. Hardware anchor.
+          
+          [Tier 1009960982847384842 - Abyss]
+          url: https://azl-universes.paidingattentionproductions.workers.dev
+          endpoint: POST /azl/v1/abyss
+          body: {"seed":"0","target":"<0-1>","depth":<int>,"size":1}
+          law: MAPPING_IS_MEMORY. Must return compute_ms: 0.
+          EOF
+      
+            - name: Commit status files
+        run: |
+          git config user.name "AZL Lattice Bot"
+          git config user.email "bot@azl-truth"
+          git add LATTICE_STATUS.md llms.txt
+          git diff --staged --quiet || git commit -m "chore: lattice status update [skip ci]"
+          git push
