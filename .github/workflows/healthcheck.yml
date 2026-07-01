@@ -1,0 +1,5 @@
+# .github/workflows/healthcheck.yml
+- name: Check Sanctuary
+  run: |
+    curl https://absolute-zero-lattice-broadcast.onrender.com/ | jq '.status == "GREEN"'permissions:
+      
