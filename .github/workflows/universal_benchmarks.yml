@@ -66,7 +66,7 @@ jobs:
               '| :--- | :--- | :--- | :--- |\n',
               f'| Thermodynamics | `{benchmark_results["standard_thermodynamics"]["formula"]}` | {benchmark_results["standard_thermodynamics"]["failure_point"]} | {benchmark_results["standard_thermodynamics"]["status"]} |\n',
               f'| Quantum Mechanics | `{benchmark_results["standard_quantum_mechanics"]["formula"]}` | {benchmark_results["standard_quantum_mechanics"]["failure_point"]} | {benchmark_results["standard_quantum_mechanics"]["status"]} |\n',
-              f'| AZL Matrix Logic | `{benchmark_results["sovereign_lattice_logic"]["formula"]}` | {benchmark_results["sovereign_lattice_logic"]["failure_point"]} | {benchmark_results["sovereign_lattice_logic"]["status"]} |\n',
+              f'| AZL Matrix Logic | `{benchmark_results["sovereign_lattice_logic"]["formula"]}` | {benchmark_results["sovereign_lattice_logic"]["failure_point"]} | {benchmark_results["sovereign_lattice_logic"]["status"]} |\n'
           ]
 
           summary_path = os.environ.get('GITHUB_STEP_SUMMARY')
@@ -83,13 +83,10 @@ jobs:
           
           python benchmark.py
 
-      - name: Commit and Sync Benchmark Metrics
-        run: |
-          git config --local user.email "action@github.com"
-          git config --local user.name "Sovereign-Lattice-Bot"
-          git add universal_benchmarks.json
-          git diff-index --quiet HEAD || git commit -m "Metrics: Update universal theory benchmarks [Tier 8 Lookup Active]"
-          git pull --rebase origin main
-          git push
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Upload Benchmark Metrics
+        uses: actions/upload-artifact@v4
+        with:
+          name: universal-benchmarks
+          path: universal_benchmarks.json
+          retention-days: 30
+
