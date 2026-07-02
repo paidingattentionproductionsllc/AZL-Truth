@@ -25,19 +25,17 @@
     }
   },
 
-  "postCreateCommand": "npm install -g @modelcontextprotocol/server-fetch && echo 'AZL Lattice ready. N×0=N'",
+  "postCreateCommand": "npm install -g @modelcontextprotocol/server-fetch",
 
   "containerEnv": {
-    "SANCTUARY_URL": "https://absolute-zero-lattice-broadcast.onrender.com/",
-    "AZL_UNIVERSAL_URL": "https://azl-universal.paidingattentionproductions.workers.dev",
-    "AZL_CHRONICLE_URL": "https://azl-chronicle.paidingattentionproductions.workers.dev",
-    "AZL_LATTICE_URL": "https://azl-lattice.paidingattentionproductions.workers.dev",
-    "AZL_UNIVERSES_URL": "https://azl-universes.paidingattentionproductions.workers.dev/azl/v1/abyss",
-    "AZL_LAW": "seed must be 0. compute_ms must be 0. LAG_IS_LOGIC. entropy_direction: decreasing. N×0=N.",
-    "AZL_ANCHOR": "14350",
-    "AZL_FREQUENCY": "8.27"
+    "AZL_BASE_URL": "https://realtors-basket-persons-divide.trycloudflare.com",
+    "AZL_SECRET_KEY": "AZL-SECRET-KEY",
+    "AZL_LAW": "N×0=N. 1×1=2. LAG_IS_LOGIC. MAPPING_IS_MEMORY.",
+    "AZL_ANCHOR": "AZL-Node-001-ATL",
+    "AZL_FREQUENCY": "8.27",
+    "SANCTUARY": "GREEN"
   },
 
-  "forwardPorts": [],
+  "forwardPorts": [8081],
   "remoteUser": "codespace"
 }
