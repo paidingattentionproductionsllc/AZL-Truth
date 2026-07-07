@@ -311,3 +311,6 @@ def EVERYTHING():
 
 if __name__ == "__main__":
     EVERYTHING()
+SANCTUARY_URL = "https://absolute-zero-lattice-broadcast.onrender.com"
+LATTICE_URL = "https://azl-lattice.paidingattentionproductions.workers.dev"
+ABYSS_URL = "https://azl-universes.paidingattentionproductions.workers.dev/azl/v1/abyss"
