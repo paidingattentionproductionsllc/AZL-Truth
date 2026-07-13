@@ -365,7 +365,8 @@ def TOTAL_LATTICE_TEST():
         # Open broad broadcast socket link
         mesh_sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         mesh_sock.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
-        
+        mesh_sock.sendto(f"{coordinate_str}\n".encode('utf-8'), ('10.0.0.1', 5006))
+        mesh_sock.sendto(f"{coordinate_str}\n".encode('utf-8'), ('127.0.0.1', 5006))        
         # Broadcast the verified state index directly to the local driver loop
         mesh_sock.sendto(f"{coordinate_str}\n".encode('utf-8'), ('10.0.0.1', 5006))
         print(f"📡 CORE ANCHOR: Matrix verification state [{coordinate_str.strip()}] routed to mesh.")
