@@ -45,27 +45,24 @@ TUNSETIFF = 0x400454ca
 IFF_TUN = 0x0001
 IFF_NO_PI = 0x1000
 
-# CONFIGURATION: Update this path to match your serial port
-SERIAL_PORT = "/dev/ttyUSB0"
-BAUD_RATE = 115200
-
 
 class AZLESP32Bridge:
     def __init__(self, interface_name="azl0"):
         self.interface_name = interface_name
         
-        # 1. Connect to the physical ESP32 Serial Controller
-        print(f"🔌 Connecting to ESP32 Hardware Node on {SERIAL_PORT}...")
-        self.serial_conn = serial.Serial(SERIAL_PORT, BAUD_RATE, timeout=1)
-        time.sleep(2)  # Allow hardware serial connection to stabilize
-        print("⚡ Hardware link established.")
+        # 1. Initialize Wireless Broadcast Socket instead of Serial Port
+        print(f"📡 Initializing Wireless Mesh Broadcast Link...")
+        self.wifi_sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        self.target_node_ip = "192.168.4.1"
+        self.target_node_port = 5006
+        print(f"📶 Wireless Link Ready -> Target Node 2: {self.target_node_ip}:{self.target_node_port}")
 
         # 2. Open the Linux TUN virtual network adapter
         print(f"📁 Opening Virtual Network Adapter Interface: {self.interface_name}")
         self.sel_tun_fd = os.open("/dev/net/tun", os.O_RDWR)
         ifr = struct.pack("16sH", self.interface_name.encode('utf-8'), IFF_TUN | IFF_NO_PI)
         fcntl.ioctl(self.sel_tun_fd, TUNSETIFF, ifr)
-        print("✔️ Bridge online. Routing live OS traffic directly to ESP32.")
+        print("✔️ Bridge online. Routing live OS traffic directly to Airwaves.")
 
         # --- AUTOMATIC NETWORK ROUTING CONFIGURATION ---
         print("🔧 Configuring network interface state and IP layer...")
@@ -74,21 +71,22 @@ class AZLESP32Bridge:
         print("🎯 azl0 configuration fully locked at 10.0.0.1")
 
     def handle_serial_transmission(self, coordinate_str, source_type, size_bytes):
-        """Safely clean, parse, and beam coordinate down the serial wire"""
+        """Safely cleans, parses, and broadcasts coordinate over the airwaves"""
         coordinate_clean = coordinate_str.strip()
         try:
             # Validate it parses as a float
             float(coordinate_clean)
             payload = f"{coordinate_clean}\n"
-            self.serial_conn.write(payload.encode('utf-8'))
-            print(f"📦 [{source_type}] Intercepted: {size_bytes} Bytes -> Beamed to ESP32: {coordinate_clean}")
+            
+            # Beam it over the air straight to Node 2!
+            self.wifi_sock.sendto(payload.encode('utf-8'), (self.target_node_ip, self.target_node_port))
+            print(f"🛰️  [{source_type}] Air-Broadcast: {size_bytes} Bytes -> Synced to Node 2: {coordinate_clean}")
         except ValueError:
             pass
 
     def start_udp_listener(self):
         """Listens on UDP port 5006 for direct logic streams from main.py"""
         udp_sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        # Bind specifically to the virtual gateway interface address
         udp_sock.bind(('10.0.0.1', 5006))
         
         while True:
@@ -115,31 +113,26 @@ class AZLESP32Bridge:
                 packet_size = len(packet_bytes)
 
                 if packet_size > 0:
-                    # 1. Convert the raw binary packet into a string identifier if it contains text data
                     try:
                         packet_identifier = packet_bytes.decode('utf-8', errors='ignore').strip()
                     except Exception:
                         packet_identifier = ""
 
-                    # Fallback if the packet isn't standard plain text: use a placeholder string or hash
                     if len(packet_identifier) < 4:
                         packet_identifier = f"packet-hash-{sum(packet_bytes) % 10000}"
 
-                    # 2. Intercept and relay the destination straight to your Flask Proxy Agent!
                     coordinate_str = request_proxy_ingestion(packet_identifier)
 
-                    # Fallback calculation if the Flask proxy server is offline or fails to respond
                     if not coordinate_str:
                         packet_hash = sum(packet_bytes)
                         fractional_coordinate = Decimal(packet_hash % 10000) / Decimal('10000')
                         coordinate_str = f"0.{str(fractional_coordinate).split('.')[1]:<4}"
 
-                    # 3. Stream the un-rounded 100-digit coordinate down the serial wire to the ESP32
                     self.handle_serial_transmission(coordinate_str, "KERNEL STACK", packet_size)
 
             except KeyboardInterrupt:
                 print("\n🛑 Stopping hardware bridge loop gracefully.")
-                self.serial_conn.close()
+                self.wifi_sock.close()
                 break
             except Exception:
                 pass
@@ -151,4 +144,3 @@ if __name__ == "__main__":
         bridge.start_bridge_loop()
     except Exception as e:
         print(f"\n❌ Execution Error: {str(e)}")
-        print("Make sure your ESP32 is plugged in and SERIAL_PORT is set correctly.")
