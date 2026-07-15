@@ -1,0 +1,8 @@
+# Protect Google Credentials
+server_secret.json
+client_secret.json
+token.json
+
+# Python environment files
+__pycache__/
+*.pyc
