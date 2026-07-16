@@ -16,6 +16,7 @@ app = Flask(__name__)
 MIYAKE_14350_BP_ANCHOR = Decimal("14350.0")
 LEDGER_FILE = "casteelian_ledger.json"
 TOKEN_FILE = "token.json"
+CLOUD_SYNC_URL = "https://paidingattention-2-0-67229128316.us-west1.run.app/api/ledger/sync"
 
 # Shared System State
 AZL_LIVE_STATE = {
@@ -37,12 +38,32 @@ def load_ledger():
 
 def save_to_ledger(coordinate, url):
     ledger = load_ledger()
-    ledger[str(coordinate)] = {
+    coordinate_str = str(coordinate)
+    
+    # Update local storage
+    ledger[coordinate_str] = {
         "url": url,
         "timestamp": __import__('time').time()
     }
     with open(LEDGER_FILE, 'w') as f:
         json.dump(ledger, f, indent=4)
+
+    # Automatically mirror state change to Cloud Run instance
+    try:
+        payload = {coordinate_str: ledger[coordinate_str]}
+        req = urllib.request.Request(
+            CLOUD_SYNC_URL,
+            data=json.dumps(payload).encode('utf-8'),
+            headers={'Content-Type': 'application/json'},
+            method='POST'
+        )
+        # Tight timeout prevents internet hiccups from freezing local hardware loops
+        with urllib.request.urlopen(req, timeout=2) as response:
+            pass
+        print(f"🛰️  [SYNC] Unified entry {coordinate_str[:12]}... pushed to Cloud Hub.")
+    except Exception as e:
+        # Fails silently to ensure hardware continues to function offline
+        pass
 
 # --- PROXY INGESTION AGENT ---
 def proxy_ingest_url(url):
@@ -54,10 +75,8 @@ def proxy_ingest_url(url):
     
     # Check if this is a raw packet string, local hash, or invalid URL format
     if url_clean.startswith("packet-hash-") or not ("." in url_clean) or " " in url_clean or ":" in url_clean:
-        # Process the raw metadata bytes locally and skip the live web request
         raw_bytes = url_clean.encode('utf-8')
     else:
-        # Format a clean web request path
         if not url_clean.startswith("http://") and not url_clean.startswith("https://"):
             url_target = "https://" + url_clean
         else:
@@ -71,7 +90,6 @@ def proxy_ingest_url(url):
             with urllib.request.urlopen(req, timeout=3) as response:
                 raw_bytes = response.read()
         except Exception:
-            # Safe Fallback: If the address doesn't resolve or web request fails, use the string footprint bytes
             raw_bytes = url_clean.encode('utf-8')
             
     try:
@@ -82,7 +100,6 @@ def proxy_ingest_url(url):
             
         casteelian_coordinate = (coordinate * MIYAKE_14350_BP_ANCHOR) % Decimal("1.0")
         
-        # Commit to the local ledger
         save_to_ledger(casteelian_coordinate, url_clean)
         return str(casteelian_coordinate), len(raw_bytes)
     except Exception as e:
