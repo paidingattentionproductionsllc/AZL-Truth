@@ -37,6 +37,8 @@ from azl_truth_module import (
     particle_map, consciousness_map, honesty_check,
     lattice_expansion, deep_time_anchor,
     get_dark_stars, run_17_domain_test, run_azl_core_tests,
+    proxy_ingest_url, get_ledger, get_matrix_state,
+    generate_azl_address, get_unified_tiers,
 )
 try:
     from mpmath import mpf
@@ -1082,6 +1084,25 @@ class AZLHandler(http.server.BaseHTTPRequestHandler):
                 except ValueError as ve:
                     self._json({"error": str(ve)}, 400)
 
+            # ── AZL-Truth: Matrix Live State  (azl_api_relay.py) ──────────────
+            elif path == "/api/matrix/state":
+                self._json(get_matrix_state())
+
+            # ── AZL-Truth: Casteelian Ledger  (azl_api_relay.py) ─────────────
+            elif path == "/api/ledger":
+                self._json(get_ledger())
+
+            # ── AZL-Truth: Unified Tier Address  (azl_unified.py) ────────────
+            elif path == "/api/unified/address":
+                try:
+                    n = int(params.get("n", ["1"])[0])
+                    self._json(generate_azl_address(n))
+                except ValueError as ve:
+                    self._json({"error": str(ve)}, 400)
+
+            elif path == "/api/unified/tiers":
+                self._json(get_unified_tiers())
+
             else:
                 self._json({"error": "Not found", "path": path,
                             "try": "GET /api for available endpoints"}, 404)
@@ -1104,13 +1125,21 @@ class AZLHandler(http.server.BaseHTTPRequestHandler):
             parsed = urllib.parse.urlparse(self.path)
             path   = parsed.path.rstrip("/")
 
-            if path != "/api/agent":
-                self._json({"error": "Not found", "path": path}, 404)
-                return
-
             length = int(self.headers.get("Content-Length", 0))
             body   = self.rfile.read(length) if length else b"{}"
             data   = json.loads(body)
+
+            if path == "/api/proxy/ingest":
+                url = data.get("url", "").strip()
+                if not url:
+                    self._json({"error": "Missing 'url' field in JSON body"}, 400)
+                    return
+                self._json(proxy_ingest_url(url))
+                return
+
+            if path != "/api/agent":
+                self._json({"error": "Not found", "path": path}, 404)
+                return
 
             messages = data.get("messages", [])
             if not messages:

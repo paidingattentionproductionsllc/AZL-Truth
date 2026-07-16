@@ -1,12 +1,15 @@
 # AZL-Truth Integration Module
 # Brings AZL-Truth repo capabilities into the AZL Intelligence Platform
 # Sources: azl_core.py, freedom_pulse.py, universal_mapper.py, expansion.py,
-#          deep_time.py, dark_stars_100.json, azl_consciousness.py
+#          deep_time.py, dark_stars_100.json, azl_api_relay.py, azl_unified.py
 # LAW: 0×N=0 | N×0=N | 1×N=N+1 | 1×1=2 | VOID FIRST > DARK > LIGHT
 
 import json
 import os
 import math
+import time
+import threading
+import urllib.request
 from decimal import Decimal, getcontext
 
 getcontext().prec = 510
@@ -586,4 +589,182 @@ def run_azl_core_tests() -> dict:
         "fail":    len(tests) - passed,
         "verdict": "PASS" if passed == len(tests) else "FAIL",
         "results": tests
+    }
+
+# ─────────────────────────────────────────────────────────────────────────────
+# CASTEELIAN LEDGER + PROXY INGESTION  (from azl_api_relay.py)
+# Fetches a URL's raw bytes → Casteelian coordinate → persists in ledger file
+# ─────────────────────────────────────────────────────────────────────────────
+LEDGER_FILE = "casteelian_ledger.json"
+CLOUD_SYNC_URL = "https://paidingattention-2-0-67229128316.us-west1.run.app/api/ledger/sync"
+
+_ledger_lock = threading.Lock()
+
+def load_ledger() -> dict:
+    if os.path.exists(LEDGER_FILE):
+        try:
+            with open(LEDGER_FILE, "r") as f:
+                return json.load(f)
+        except Exception:
+            return {}
+    return {}
+
+def save_ledger_entry(coordinate: str, url: str) -> None:
+    with _ledger_lock:
+        ledger = load_ledger()
+        ledger[coordinate] = {"url": url, "timestamp": time.time()}
+        with open(LEDGER_FILE, "w") as f:
+            json.dump(ledger, f, indent=2)
+    # Mirror to cloud (best-effort, non-blocking)
+    def _sync():
+        try:
+            payload = json.dumps({coordinate: ledger[coordinate]}).encode()
+            req = urllib.request.Request(
+                CLOUD_SYNC_URL, data=payload,
+                headers={"Content-Type": "application/json"}, method="POST"
+            )
+            urllib.request.urlopen(req, timeout=2)
+        except Exception:
+            pass
+    threading.Thread(target=_sync, daemon=True).start()
+
+def proxy_ingest_url(url: str) -> dict:
+    """
+    From azl_api_relay.py: fetch a URL (or treat it as raw string),
+    run base-256 fractional expansion, anchor to Miyake 14350 BP,
+    save to ledger. Works offline (falls back to string bytes on network error).
+    """
+    url_clean = url.strip()
+    # Detect raw string / non-URL
+    is_raw = (
+        url_clean.startswith("packet-hash-") or
+        "." not in url_clean or
+        " " in url_clean or
+        (url_clean.count(":") > 1 and not url_clean.startswith("http"))
+    )
+    raw_bytes: bytes
+    byte_source: str
+    if is_raw:
+        raw_bytes  = url_clean.encode("utf-8")
+        byte_source = "raw_string"
+    else:
+        target = url_clean if url_clean.startswith("http") else "https://" + url_clean
+        try:
+            req = urllib.request.Request(target, headers={"User-Agent": "AZL-Proxy-Agent/1.0"})
+            with urllib.request.urlopen(req, timeout=4) as resp:
+                raw_bytes  = resp.read()
+                byte_source = "http_fetch"
+        except Exception:
+            raw_bytes  = url_clean.encode("utf-8")
+            byte_source = "string_fallback"
+
+    getcontext().prec = 100
+    coord = Decimal("0.0")
+    for i, byte in enumerate(raw_bytes, start=1):
+        coord += Decimal(byte) / (Decimal("256") ** i)
+    casteelian = (coord * Decimal(str(MIYAKE_BP))) % Decimal("1.0")
+    getcontext().prec = 510
+
+    coord_str = str(casteelian)
+    save_ledger_entry(coord_str, url_clean)
+    azl_n = int(casteelian * PRECISION)
+
+    return {
+        "status":      "SUCCESS",
+        "url":         url_clean,
+        "bytes":       len(raw_bytes),
+        "byte_source": byte_source,
+        "coordinate":  coord_str,
+        "azl_address": f"AZL-{azl_n:010d}",
+        "anchor":      f"Miyake {MIYAKE_BP} BP",
+        "law":         "N×0=N"
+    }
+
+def get_ledger() -> dict:
+    ledger = load_ledger()
+    return {
+        "entries":     len(ledger),
+        "ledger":      ledger,
+        "ledger_file": LEDGER_FILE,
+        "cloud_sync":  CLOUD_SYNC_URL
+    }
+
+# ─────────────────────────────────────────────────────────────────────────────
+# MATRIX LIVE STATE  (from azl_api_relay.py — UDP stream listener state)
+# Tracks last coordinate received; updated if a UDP stream is active
+# ─────────────────────────────────────────────────────────────────────────────
+_matrix_state: dict = {
+    "coordinate":      "0.0",
+    "domain_status":   "REPLIT_PLATFORM_ACTIVE",
+    "system_verdict":  "UNIVERSAL_LAW_CONFIRMED",
+    "last_updated":    0.0,
+    "law":             "N×0=N",
+    "anchor":          f"Miyake {MIYAKE_BP} BP"
+}
+
+def update_matrix_state(coordinate: str) -> None:
+    val = float(coordinate)
+    _matrix_state["coordinate"]    = coordinate
+    _matrix_state["last_updated"]  = time.time()
+    if val == 0.0:
+        _matrix_state["domain_status"]  = "DESK_DOMAIN_ANCHOR (Territory 1)"
+        _matrix_state["system_verdict"] = "UNIVERSAL_LAW_CONFIRMED"
+    else:
+        _matrix_state["domain_status"]  = "ROOM_RELAY_ACTIVE (Territory 2)"
+        _matrix_state["system_verdict"] = "VERIFIED_MATRIX_STATE"
+
+def get_matrix_state() -> dict:
+    return dict(_matrix_state)
+
+# ─────────────────────────────────────────────────────────────────────────────
+# UNIFIED TIER ADDRESS SYSTEM  (from azl_unified.py)
+# Maps catalog tiers (Canon → PanSTARRS) to AZL [0,1] addresses
+# ─────────────────────────────────────────────────────────────────────────────
+UNIFIED_TIERS = {
+    1: {"name": "Canon",      "end": 567},
+    2: {"name": "NGC_IC_HIP", "end": 120_000},
+    3: {"name": "GaiaDR3",    "end": 1_000_000},
+    4: {"name": "SDSS",       "end": 10_000_000},
+    5: {"name": "2MASS",      "end": 50_000_000},
+    6: {"name": "WISE",       "end": 200_000_000},
+    7: {"name": "PanSTARRS",  "end": 1_000_000_000},
+}
+
+def generate_azl_address(n: int) -> dict:
+    """
+    From azl_unified.py: map any catalog index n → tier + AZL address.
+    n must be in [1, 1_000_000_000].
+    """
+    if n < 1:
+        return {"error": "n must be >= 1", "n": n}
+    tier_num = 7
+    tier_name = "PanSTARRS"
+    for t, data in UNIFIED_TIERS.items():
+        if n <= data["end"]:
+            tier_num  = t
+            tier_name = data["name"]
+            break
+    value   = n / 1_000_000_000
+    in_zero = n < 1_000_000_000
+    return {
+        "n":       n,
+        "tier":    tier_num,
+        "catalog": tier_name,
+        "value":   value,
+        "address": f"AZL-{n:010d}",
+        "range":   "zero (0-domain)" if in_zero else "one (SELF-domain)",
+        "law":     "N×0=N",
+        "proof":   "1×1=2"
+    }
+
+def get_unified_tiers() -> dict:
+    return {
+        "tiers":       UNIFIED_TIERS,
+        "total":       7,
+        "domain":      "[0, 1]",
+        "precision":   "10^9 points",
+        "max_address": "AZL-1000000000",
+        "min_address": "AZL-0000000001",
+        "law":         "N×0=N",
+        "formula":     "address = n / 10^9"
     }
