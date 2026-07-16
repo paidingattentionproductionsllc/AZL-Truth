@@ -1,0 +1,17 @@
+{
+  "metadata": {
+    "version": "3.3",
+    "total_objects": 100,
+    "avg_visible": 0.578,
+    "avg_substrate": 0.422,
+    "std": 0.347,
+    "sources": ["BlackCAT", "Fermi 4LAC", "Chandra", "VLBI"]
+  },
+  "objects": [
+    {"name": "M87*", "mass_msun": 6.5e9, "eddington": 0.001, "visible": 0.060, "keep": 0.940},
+    {"name": "Sag_A*", "mass_msun": 4.0e6, "eddington": 0.0001, "visible": 0.140, "keep": 0.860},
+    {"name": "Cygnus_X-1", "mass_msun": 21.2, "eddington": 0.01, "visible": 0.150, "keep": 0.850},
+    {"name": "V404_Cyg", "mass_msun": 9.0, "eddington": 0.001, "visible": 0.001, "keep": 0.999},
+    {"name": "3C_454.3", "mass_msun": 1.2e9, "eddington": 0.5, "visible": 0.990, "keep": 0.010}
+  ]
+}

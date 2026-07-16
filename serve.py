@@ -31,6 +31,13 @@ if not os.path.exists("icon-192.png") or not os.path.exists("icon-512.png"):
 # ── import AZL engine ─────────────────────────────────────────────────────────
 sys.path.insert(0, ".")
 from main import AZL, AZL_CONTRACT, CHECK_AZL_BOOT, TOTAL_LATTICE_TEST
+from azl_truth_module import (
+    casteelian_coordinate, registry_lookup, get_registry,
+    universal_map, azl_range, coordinate_to_azl, azl_to_coordinate,
+    particle_map, consciousness_map, honesty_check,
+    lattice_expansion, deep_time_anchor,
+    get_dark_stars, run_17_domain_test, run_azl_core_tests,
+)
 try:
     from mpmath import mpf
     MP = True
@@ -990,6 +997,88 @@ class AZLHandler(http.server.BaseHTTPRequestHandler):
                     a = float(params.get("a", ["0.6"])[0])
                     b = float(params.get("b", ["0.6"])[0])
                     self._json(azl_source_law_compute(a, b))
+                except ValueError as ve:
+                    self._json({"error": str(ve)}, 400)
+
+            # ── AZL-Truth: Dark Stars ─────────────────────────────────────────
+            elif path in ("/api/dark-stars", "/api/darkstars"):
+                try:
+                    limit = int(params.get("limit", ["100"])[0])
+                except ValueError:
+                    limit = 100
+                self._json(get_dark_stars(limit))
+
+            # ── AZL-Truth: 17-Domain Test ─────────────────────────────────────
+            elif path == "/api/test/17domains":
+                self._json(run_17_domain_test())
+
+            # ── AZL-Truth: AZL-Core Test ──────────────────────────────────────
+            elif path == "/api/test/core":
+                self._json(run_azl_core_tests())
+
+            # ── AZL-Truth: Casteelian Registry ────────────────────────────────
+            elif path == "/api/registry/lookup":
+                query = params.get("q", [""])[0].strip()
+                if not query:
+                    self._json({"error": "Missing ?q= parameter"}, 400)
+                else:
+                    self._json(registry_lookup(query))
+
+            elif path == "/api/registry":
+                self._json(get_registry())
+
+            # ── AZL-Truth: Universal Spatial Mapper ───────────────────────────
+            elif path == "/api/map/coordinate":
+                try:
+                    ti = int(params.get("tier",  ["500"])[0])
+                    se = int(params.get("scale", ["5"])[0])
+                    self._json(universal_map(ti, se))
+                except ValueError as ve:
+                    self._json({"error": str(ve)}, 400)
+
+            # ── AZL-Truth: AZL Core Range ─────────────────────────────────────
+            elif path == "/api/core/range":
+                try:
+                    n = int(params.get("n", ["1"])[0])
+                    self._json(azl_range(n))
+                except ValueError as ve:
+                    self._json({"error": str(ve)}, 400)
+
+            # ── AZL-Truth: Particle Mapping ───────────────────────────────────
+            elif path == "/api/particle":
+                p   = params.get("type",  ["electron"])[0].lower()
+                idx = params.get("index", ["1"])[0]
+                try:
+                    self._json(particle_map(p, int(idx)))
+                except ValueError as ve:
+                    self._json({"error": str(ve)}, 400)
+
+            # ── AZL-Truth: Consciousness Map ──────────────────────────────────
+            elif path == "/api/consciousness":
+                azl_addr = params.get("azl", ["AZL-0000000001"])[0]
+                self._json(consciousness_map(azl_addr))
+
+            # ── AZL-Truth: Honesty Check ──────────────────────────────────────
+            elif path == "/api/honesty":
+                action = params.get("action", [""])[0]
+                if not action:
+                    self._json({"error": "Missing ?action= parameter"}, 400)
+                else:
+                    self._json(honesty_check(action))
+
+            # ── AZL-Truth: Lattice Expansion ──────────────────────────────────
+            elif path == "/api/expansion":
+                try:
+                    n = int(params.get("nodes", ["14350"])[0])
+                    self._json(lattice_expansion(n))
+                except ValueError as ve:
+                    self._json({"error": str(ve)}, 400)
+
+            # ── AZL-Truth: Deep Time Anchor ───────────────────────────────────
+            elif path == "/api/deep-time":
+                try:
+                    bp = int(params.get("bp", ["14350"])[0])
+                    self._json(deep_time_anchor(bp))
                 except ValueError as ve:
                     self._json({"error": str(ve)}, 400)
 
