@@ -11,7 +11,7 @@ Usage:
 
 Environment variables:
     ESP_NAT_HOST     - Router IP address (default: 192.168.4.1)
-    ESP_NAT_PORT     - Remote console TCP port (default: 2323)
+    ESP_NAT_PORT     - Remote console TCP port (default: 23)
     ESP_NAT_PASSWORD - Remote console password (default: empty)
 """
 
@@ -32,7 +32,7 @@ from fastmcp import FastMCP, Context
 # ---------------------------------------------------------------------------
 
 ESP_HOST = os.environ.get("ESP_NAT_HOST", "192.168.4.1")
-ESP_PORT = int(os.environ.get("ESP_NAT_PORT", "2323"))
+ESP_PORT = int(os.environ.get("ESP_NAT_PORT", "23"))
 ESP_PASSWORD = os.environ.get("ESP_NAT_PASSWORD", "1*1=2_certainty")
 
 COMMAND_TIMEOUT = 10  # seconds to wait for command output
@@ -595,7 +595,7 @@ async def acl_add(
     """Add a firewall ACL rule to the NAT router.
 
     Rules filter traffic between WiFi clients and the internet.
-    Use client IPs (e.g. 192.168.4.x) or DHCP device names for src/dst.
+    Use client IPs (e.g. 192.168.4.0/24) or DHCP device names for src/dst.
 
     Args:
         direction: 'upstream' (client → internet) or 'downstream' (internet → client).
@@ -795,7 +795,7 @@ async def restart() -> str:
 
 
 # ═══════════════════════════════════════════════════════════════════════════
-# NETWORK TRACE (PCAP CAPTURE + TCPDUMP)
+# NETWORK TRACE (PCAP PACKET CAPTURE + TCPDUMP)
 # ═══════════════════════════════════════════════════════════════════════════
 
 
