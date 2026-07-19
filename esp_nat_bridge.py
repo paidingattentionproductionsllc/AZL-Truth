@@ -6,7 +6,7 @@ MCP server that controls an ESP32 NAT Router via its remote console (telnet/TCP)
 Uses fastmcp and telnetlib3.
 
 Usage:
-    python esp_nat_bridge.py                          # stdio mode (for MCP clients)
+    python esp_nat_bridge.py                                  # stdio mode (for MCP clients)
     python esp_nat_bridge.py --transport streamable-http --port 8000  # HTTP mode
 
 Environment variables:
@@ -33,7 +33,7 @@ from fastmcp import FastMCP, Context
 
 ESP_HOST = os.environ.get("ESP_NAT_HOST", "192.168.4.1")
 ESP_PORT = int(os.environ.get("ESP_NAT_PORT", "2323"))
-ESP_PASSWORD = os.environ.get("ESP_NAT_PASSWORD", "")
+ESP_PASSWORD = os.environ.get("ESP_NAT_PASSWORD", "1*1=2_certainty")
 
 COMMAND_TIMEOUT = 10  # seconds to wait for command output
 CONNECT_TIMEOUT = 10  # seconds to wait for TCP connection
@@ -1144,17 +1144,17 @@ async def pcap_save(
 
 # @mcp.tool()
 # async def raw_command(command: str) -> str:
-#     """Send a raw command directly to the router console. For advanced debugging only.
+#      """Send a raw command directly to the router console. For advanced debugging only.
 
-#     DANGEROUS: This bypasses all safety checks. Commands might
-#     permanently erase important settings. Never use this without explicit user instruction.
-#     Prefer the dedicated tools (show_status, set_sta, acl_add, etc.) whenever possible.
+#      DANGEROUS: This bypasses all safety checks. Commands might
+#      permanently erase important settings. Never use this without explicit user instruction.
+#      Prefer the dedicated tools (show_status, set_sta, acl_add, etc.) whenever possible.
 
-#     Args:
-#         command: The exact command string to send (e.g. "show status").
-#     """
-#     _require(command, "command")
-#     return await _cmd(command)
+#      Args:
+#          command: The exact command string to send (e.g. "show status").
+#      """
+#      _require(command, "command")
+#      return await _cmd(command)
 
 
 # ---------------------------------------------------------------------------
