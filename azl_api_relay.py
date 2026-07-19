@@ -12,11 +12,14 @@ getcontext().prec = 100
 # 2. Setup Flask App
 app = Flask(__name__)
 
-# Constants
+# # Constants
 MIYAKE_14350_BP_ANCHOR = Decimal("14350.0")
 LEDGER_FILE = "casteelian_ledger.json"
 TOKEN_FILE = "token.json"
-CLOUD_SYNC_URL = "https://paidingattention-2-0-67229128316.us-west1.run.app/api/ledger/sync"
+
+# Updated Triple-Layer Endpoint Paths
+CLOUD_SYNC_URL = "https://paidingattention.org/api/azl/ledger/sync"
+REPLIT_INGEST_URL = "https://paidingattention.org/api/azl/coordinate/ingest"
 
 # Shared System State
 AZL_LIVE_STATE = {
@@ -36,18 +39,19 @@ def load_ledger():
             return {}
     return {}
 
-def save_to_ledger(coordinate, url):
+def save_to_ledger(coordinate, url_clean):
     ledger = load_ledger()
     coordinate_str = str(coordinate)
     
     # Update local storage
     ledger[coordinate_str] = {
-        "url": url,
+        "url": url_clean,
         "timestamp": __import__('time').time()
     }
+    
     with open(LEDGER_FILE, 'w') as f:
         json.dump(ledger, f, indent=4)
-
+        
     # Automatically mirror state change to Cloud Run instance
     try:
         payload = {coordinate_str: ledger[coordinate_str]}
@@ -57,24 +61,19 @@ def save_to_ledger(coordinate, url):
             headers={'Content-Type': 'application/json'},
             method='POST'
         )
-        # Tight timeout prevents internet hiccups from freezing local hardware loops
         with urllib.request.urlopen(req, timeout=2) as response:
             pass
-        print(f"🛰️  [SYNC] Unified entry {coordinate_str[:12]}... pushed to Cloud Hub.")
+        print(f"🎯 [SYNC] Unified entry {coordinate_str[:12]}... pushed to Cloud Hub.")
     except Exception as e:
-        # Fails silently to ensure hardware continues to function offline
-        pass
+        print(f"❌ [CLOUD SYNC ERROR] Mirror to Cloud Hub failed: {e}")
+        
+    return coordinate_str, len(url_clean.encode('utf-8'))
 
 # --- PROXY INGESTION AGENT ---
 def proxy_ingest_url(url):
-    """
-    Quietly fetches URL data. If it is raw packet metadata rather than a real website,
-    it processes the string bytes directly into the Casteelian Registry without throwing a 500 error.
-    """
     url_clean = url.strip()
     
-    # Check if this is a raw packet string, local hash, or invalid URL format
-    if url_clean.startswith("packet-hash-") or not ("." in url_clean) or " " in url_clean or ":" in url_clean:
+    if url_clean.startswith("packet-hash-") or not ("." in url_clean or " " in url_clean or ":" in url_clean):
         raw_bytes = url_clean.encode('utf-8')
     else:
         if not url_clean.startswith("http://") and not url_clean.startswith("https://"):
@@ -84,7 +83,7 @@ def proxy_ingest_url(url):
             
         try:
             req = urllib.request.Request(
-                url_target, 
+                url_target,
                 headers={'User-Agent': 'AZL-Proxy-Agent/1.0'}
             )
             with urllib.request.urlopen(req, timeout=3) as response:
@@ -99,9 +98,7 @@ def proxy_ingest_url(url):
             coordinate += Decimal(byte) / (Decimal("256") ** i)
             
         casteelian_coordinate = (coordinate * MIYAKE_14350_BP_ANCHOR) % Decimal("1.0")
-        
-        save_to_ledger(casteelian_coordinate, url_clean)
-        return str(casteelian_coordinate), len(raw_bytes)
+        return save_to_ledger(casteelian_coordinate, url_clean)
     except Exception as e:
         print(f"❌ [PROXY AGENT] Processing failure: {e}")
         return None, 0
@@ -109,15 +106,10 @@ def proxy_ingest_url(url):
 # --- API ENDPOINTS ---
 @app.route('/api/matrix/state', methods=['GET'])
 def get_matrix_state():
-    """Returns current live tracking variables."""
     return jsonify(AZL_LIVE_STATE)
 
 @app.route('/api/proxy/ingest', methods=['POST'])
 def handle_proxy_ingest():
-    """
-    Endpoint for the AZL Bridge to request URL resolution and coordinate indexing.
-    Expects JSON: {"url": "example.com"}
-    """
     data = request.json or {}
     target_url = data.get("url")
     if not target_url:
@@ -145,8 +137,8 @@ def udp_stream_listener():
     except Exception as e:
         print(f"❌ Socket Lock Error: {e}")
         return
-
-    print("🛰️  Asynchronous Matrix Stream Listener: Processing on Port 5006")
+        
+    print("📡 Asynchronous Matrix Stream Listener: Processing on Port 5006")
     while True:
         try:
             data, _ = udp_sock.recvfrom(1024)
@@ -162,6 +154,21 @@ def udp_stream_listener():
                 else:
                     AZL_LIVE_STATE["domain_status"] = "ROOM_RELAY_ACTIVE (Territory 2)"
                     AZL_LIVE_STATE["system_verdict"] = "VERIFIED_MATRIX_STATE"
+                
+                # Automatically mirror UDP packets out to Replit ingest pipelines
+                try:
+                    mirror_req = urllib.request.Request(
+                        REPLIT_INGEST_URL,
+                        data=json.dumps({"coordinate": coord_str}).encode('utf-8'),
+                        headers={'Content-Type': 'application/json'},
+                        method='POST'
+                    )
+                    with urllib.request.urlopen(mirror_req, timeout=2) as resp:
+                        pass
+                    print(f"🚀 [REPLIT] Real-time UDP Coordinate synced cleanly.")
+                except Exception as mirror_err:
+                    print(f"❌ [REPLIT INGEST ERROR] Pipeline sync skipped: {mirror_err}")
+                    
         except Exception:
             pass
 
@@ -174,5 +181,5 @@ if __name__ == "__main__":
     listener_worker.start()
     
     # Start Web Gateway
-    print("📝 Mounting Integrated AZL Core Gateway API on http://0.0.0.0:8080")
+    print("⚡ Mounting Integrated AZL Core Gateway API on http://0.0.0.0:8080")
     app.run(host='0.0.0.0', port=8080, debug=False)
