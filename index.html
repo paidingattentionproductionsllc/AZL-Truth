@@ -1,0 +1,34 @@
+<script type="module">
+    // Connecting the HTML input actions directly to our live typescript module
+    import { LatticeBridge } from './lattice_bridge.js';
+    
+    const bridge = new LatticeBridge();
+    const inputField = document.getElementById('userInput');
+    const streamDisplay = document.getElementById('chatStream');
+    const visualPreview = document.getElementById('previewFrame');
+
+    inputField.addEventListener('keydown', async (event) => {
+        if (event.key === 'Enter') {
+            const command = inputField.value;
+            inputField.value = ''; // Clean the input zone immediately
+
+            // Update local UI state to show intent has been committed
+            const logLine = document.createElement('p');
+            logLine.style.color = '#ffffff';
+            logLine.textContent = `> ${command}`;
+            streamDisplay.appendChild(logLine);
+
+            // Execute the edge network transition
+            const responseData = await bridge.streamIntent(command);
+
+            // Reflect the output state instantly inside the log zone
+            const responseLine = document.createElement('p');
+            responseLine.style.color = '#00ff66';
+            responseLine.textContent = `[RETURN] Matrix Status: ${responseData.status || 'STABLE'}`;
+            streamDisplay.appendChild(responseLine);
+
+            // Scroll the window down automatically to preserve focus
+            streamDisplay.scrollTop = streamDisplay.scrollHeight;
+        }
+    });
+</script>
