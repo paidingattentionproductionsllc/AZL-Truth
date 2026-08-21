@@ -1,0 +1,9 @@
+{
+  "law": "N\u00d70=N",
+  "proof": "1\u00d71=2",
+  "domain": "[0,1] \u2192 matter",
+  "total_electrons": "100000000000000000000000000000000000000000000000000000000000000000000000000000000",
+  "mapping": "electron_idx / 10^80 = AZL_coordinate",
+  "samples_generated": 1003,
+  "anchor_lattice": "AZL-0000000001 to AZL-1000000000"
+}
